@@ -1,0 +1,20 @@
+name: geoai_retail
+
+channels:
+  - esri
+  - conda-forge
+
+dependencies:
+  - python=3.6
+  - arcgis
+  - numpy
+  - scipy
+  - scikit-learn
+  - pandas
+  - matplotlib
+  - seaborn
+  - jupyter
+  - jupyterlab
+  - pip:
+    - ipykernel
+    - python-dotenv
