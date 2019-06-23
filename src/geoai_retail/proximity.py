@@ -3,7 +3,6 @@ import os
 import pandas as pd
 from arcgis.features import GeoAccessor
 import uuid
-import itertools
 from datetime import datetime
 import calendar
 
