@@ -241,9 +241,18 @@ def closest_dataframe_from_origins_destinations(origins, origin_id_fld, destinat
 
     # if necessary, batch the analysis based on the size of the input data, and the number of destinations per origin
     if len(origin_df.index) > max_origin_cnt:
+
+        # process each batch, and save the results to a temp file in the temp directory
         closest_csv_list = [_get_closest_csv(origin_df.iloc[idx:idx + max_origin_cnt], dest_df, dest_cnt, gis)
                             for idx in range(0, len(origin_df.index), max_origin_cnt)]
+
+        # load all the temporary files into dataframes and combine them into a single dataframe
         closest_df = pd.concat([pd.read_csv(closest_csv) for closest_csv in closest_csv_list])
+
+        # clean up the temp files
+        for csv_file in closest_csv_list:
+            os.remove(csv_file)
+
     else:
         closest_df = _get_closest_df(origin_df, dest_df, dest_cnt, gis)
 

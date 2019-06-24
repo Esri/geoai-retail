@@ -72,3 +72,41 @@ def get_dataframe(in_features, gis=None):
     # df.spatial.sindex()
 
     return df
+
+
+def add_metric_by_origin_dest(parent_df, join_df, join_metric_fld):
+    """
+    Add a field to an already exploded origin to multiple destination table. The table must follow the standardized
+        schema, which it will if created using the proximity functions in this package.
+    :param parent_df: Parent destination dataframe the metric will be added onto.
+    :param join_df: Dataframe containing matching origin id's, destination id's, and the metric to be added.
+    :param join_metric_fld: The column name containing the metric to be added.
+    :return: Dataframe with the data added onto the original origin to multiple destination table.
+    """
+    # ensure everything is matching field types so the joins will work
+    origin_dtype = parent_df['origin_id'].dtype
+    dest_dtype = parent_df['destination_id_01'].dtype
+    join_df['origin_id'] = join_df['origin_id'].astype(origin_dtype)
+    join_df['destination_id'] = join_df['destination_id'].astype(dest_dtype)
+
+    # for the table being joined to the parent, set a multi-index for the join
+    join_df_idx = join_df.set_index(['origin_id', 'destination_id'])
+
+    # get the number of destinations being used
+    dest_fld_lst = [col for col in parent_df.columns if col.startswith('destination_id_')]
+
+    # initialize the dataframe to iteratively recieve all the data
+    combined_df = parent_df
+
+    # for every destination
+    for dest_fld in dest_fld_lst:
+        # create a label field with the label name with the destination id
+        out_metric_fld = f'{join_metric_fld}{dest_fld[-3:]}'
+
+        # join the label field onto the parent dataframe
+        combined_df = combined_df.join(join_df_idx[join_metric_fld], on=['origin_id', dest_fld])
+
+        # rename the label column using the named label column with the destination id
+        combined_df.columns = [out_metric_fld if col == join_metric_fld else col for col in combined_df.columns]
+
+    return combined_df
