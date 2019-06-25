@@ -23,5 +23,5 @@ ent_gis = GIS(config.ent_url, username=config.ent_user, password=config.ent_pass
 
 closest_df = closest_dataframe_from_origins_destinations(origin_fc, origin_id_fld, dest_fc, dest_id_fld, ent_gis)
 
-closest_df.to_csv('../data/interim/closest_table_test.csv')
+closest_df.to_csv('../data/interim/closest_table.csv')
 print('Success!')
