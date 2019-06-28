@@ -17,11 +17,11 @@ dest_count = 4
 ent_gis = GIS(config.ent_url, username=config.ent_user, password=config.ent_pass)
 
 
-# origin_df = utils.get_dataframe(origin_fc)
-# origin_df = origin_df.iloc[:2500].copy()
-# origin_df.spatial.set_geometry('SHAPE')
+origin_df = utils.get_dataframe(origin_fc)
+origin_df = origin_df.iloc[:2500].copy()
+origin_df.spatial.set_geometry('SHAPE')
 
-closest_df = closest_dataframe_from_origins_destinations(origin_fc, origin_id_fld, dest_fc, dest_id_fld, ent_gis)
+closest_df = closest_dataframe_from_origins_destinations(origin_df, origin_id_fld, dest_fc, dest_id_fld, ent_gis)
 
-closest_df.to_csv('../data/interim/closest_table.csv')
+closest_df.to_csv('../data/interim/closest_test.csv')
 print('Success!')

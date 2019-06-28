@@ -1,14 +1,23 @@
 import tempfile
 import uuid
 import os
+from typing import List, Any, Union
+
 import pandas as pd
 import numpy as np
 from collections import namedtuple
 from functools import reduce
 from arcgis import geoenrichment
+from arcgis.features import FeatureSet
 from arcgis.gis import GIS
+import requests
+import math
+import json
 
 import sys
+
+from pandas import DataFrame
+
 sys.path.append('./')
 import utils
 
@@ -86,9 +95,9 @@ def get_enrich_limits(gis):
     limits_dict = {itm['paramName']: itm['value'] for itm in limits_lst}
 
     # save the values into a named tuple
-    EnrichLimits = namedtuple('EnrichLimits', ['max_record_count', 'max_collections', 'max_fields'])
+    EnrichLimits = namedtuple('EnrichLimits', ['max_record_count', 'max_collections', 'max_fields', 'max_study_areas'])
     enrich_limits = EnrichLimits(limits_dict['maxRecordCount'], limits_dict['maximumDataCollections'],
-                                 limits_dict['maximumOutFieldsNumber'])
+                                 limits_dict['maximumOutFieldsNumber'], limits_dict['maximumStudyAreasNumber'])
     return enrich_limits
 
 
@@ -100,25 +109,53 @@ def _enrich_to_csv(geo_df, var_lst, gis):
 
 
 def _enrich_wrapper(geo_df, variable_lst, gis):
-    enrich_limits = get_enrich_limits(gis)
+    max_collections = get_enrich_limits(gis).max_collections
 
     var_df = pd.DataFrame([[var] + var.split('.') for var in variable_lst],
                           columns=['enrich_var', 'collection', 'var_name'])
     collections = var_df.collection.unique()
     collection_cnt = collections.size
 
-    if collection_cnt > enrich_limits.max_collections:
-        enrich_var_blocks = [list(
-            var_df[var_df['collection'].isin(collections[idx:idx + enrich_limits.max_collections])][
-                'enrich_var'].values)
-                             for idx in range(0, collection_cnt, enrich_limits.max_collections)]
+    # pre-cook the feature set json for making enrich rest requests
+    study_areas = geo_df.spatial.to_featureset().to_json
 
-        enrich_df_lst = [geoenrichment.enrich(geo_df.copy(), analysis_variables=enrich_block, return_geometry=False)
-                         for enrich_block in enrich_var_blocks]
+    # since this process can span a long time, ensure token is current
+    gis._con.relogin()
+
+    def _enrich_short(enrich_vars):
+
+        # convert the enrich_vars to string as well
+        analysis_vars = '[' + ','.join(enrich_vars) + ']'
+
+        # build the request payload
+        payload = json.dumps({
+            'studyAreas': study_areas,
+            'analysisVariables': analysis_vars,
+            'returnGeometry': 'false',
+            'token': gis._con.token,
+            'f': 'json'
+        })
+
+        # post using requests because gis._con.post cannot seem to handle it
+        resp = requests.post(f'{gis.properties.helperServices.geoenrichment.url}/Geoenrichment/Enrich', json=payload)
+        resp
+        return resp
+
+    if collection_cnt > max_collections:
+
+        var_df_blocks = [var_df[var_df['collection'].isin(collections[idx:idx + max_collections])]
+                         for idx in range(0, collection_cnt, max_collections)]
+
+        enrich_var_blocks = [list(var_blk['enrich_var'].values) for var_blk in var_df_blocks]
+
+        enrich_df_lst = [_enrich_short(enrich_block) for enrich_block in enrich_var_blocks]
 
         enrich_df = reduce(lambda left, right: pd.merge(left, right), enrich_df_lst)
 
-        return enrich_df
+    else:
+        enrich_df = _enrich_short(variable_lst)
+
+    return enrich_df
 
 
 def enrich(input_data, input_data_id_col, variable_list, gis):
@@ -127,14 +164,14 @@ def enrich(input_data, input_data_id_col, variable_list, gis):
 
     # get the limitations on the enrichment rest endpoint, and scale the analysis based on this
     enrich_limits = get_enrich_limits(gis)
-    max_records = enrich_limits.max_record_count
+    max_study_areas = enrich_limits.max_study_areas  # since the service so frequently has issues
 
     # if necessary, batch the analysis based on the size of the input data, and the number of destinations per origin
-    if len(geo_df.index) > max_records:
+    if len(geo_df.index) > max_study_areas:
 
         # process each batch, and save the results to a temp file in the temp directory
-        enrich_csv_list = [_enrich_to_csv(geo_df.iloc[idx:idx + max_records], variable_list, gis)
-                           for idx in range(0, len(geo_df.index), max_records)]
+        enrich_csv_list = [_enrich_to_csv(geo_df.iloc[idx:idx + max_study_areas], variable_list, gis)
+                           for idx in range(0, len(geo_df.index), max_study_areas)]
 
         # load all the temporary files into dataframes and combine them into a single dataframe
         enrich_df = pd.concat([pd.read_csv(enrich_csv) for enrich_csv in enrich_csv_list])
