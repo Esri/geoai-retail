@@ -6,7 +6,7 @@ purpose:    Provide a wrapper to more easily access the
 import requests
 import re
 import pandas as pd
-from arcgis.features import SpatialDataFrame
+from arcgis.features import GeoAccessor
 from arcgis.geometry import Point
 from arcgis.geometry import SpatialReference
 
@@ -70,7 +70,7 @@ class TAZ(object):
 
         while resp.json()['paging']['nextCursor'] is not None:
             resp = self.session.get(resp.json()['paging']['nextCursor'])
-            sdf_page = SpatialDataFrame.from_dict(resp.json()['data'])
+            sdf_page = pd.DataFrame(resp.json()['data'])
             df = pd.concat([df, sdf_page])
 
         if len(df.index):
@@ -96,16 +96,14 @@ class TAZ(object):
         })
 
     def set_start_as_geometry(self, df):
-        return SpatialDataFrame(
-            data=df,
-            geometry=df.startLoc.apply(lambda start_loc: self._loc_to_shape(start_loc))
-        )
+        df['SHAPE'] = df.startLoc.apply(lambda start_loc: self._loc_to_shape(start_loc))
+        df.spatial.set_geometry('SHAPE')
+        return df
 
     def set_end_as_geometry(self, df):
-        return SpatialDataFrame(
-            data=df,
-            geometry=df.endLoc.apply(lambda end_loc: self._loc_to_shape(end_loc))
-        )
+        df['SHAPE'] = df.endLoc.apply(lambda end_loc: self._loc_to_shape(end_loc))
+        df.spatial.set_geometry('SHAPE')
+        return df
 
     def get_trip_destination_spatial_dataframe(self, latitude, longitude, destination_radius='100m'):
         """

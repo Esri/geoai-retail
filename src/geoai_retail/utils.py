@@ -167,6 +167,9 @@ def add_metric_by_dest(parent_df, join_df, join_id_fld, join_metric_fld, get_dum
     # get the number of destinations being used
     dest_fld_lst = [col for col in parent_df.columns if col.startswith('destination_id_')]
 
+    # create a list of all prospective locations' names
+    location_name_lst = join_df[join_metric_fld].unique()
+
     # initialize the dataframe to iteratively receive all the data
     combined_df = parent_df
 
@@ -253,3 +256,24 @@ def add_normalized_columns_to_closest_dataframe(closest_df, closest_factor_fld_r
     normalize_df.drop(columns=normalize_fld, inplace=True)
 
     return normalize_df
+
+
+def add_store_name_category(df, store_name_column, location_count_threshold=1):
+    """
+    Add and calculate a store name column based on the count of the location name. This enables comparing a store
+        brand recognition to the independent mom and pop locations for brand recognition, or avoidance to independents.
+    :param df: Data frame with a column identifying the location brand or store name.
+    :param store_name_column: Column in the dataframe containing the store names.
+    :param location_count_threshold: Optional - Integer representing the store counts - default 1
+    :return: Updated dataframe with a new column indicating the store name category including independent if the count
+        of locations is at or below the location count threshold.
+    """
+    coffee_name_cnt = df.groupby(store_name_column).count().ix[:, 0].sort_values(ascending=False).to_frame()
+    coffee_name_cnt.columns = ['count']
+    coffee_name_cnt.reset_index(inplace=True)
+
+    coffee_name_cnt['dest_name_category'] = coffee_name_cnt.apply(
+        lambda r: 'INDEPENDENT' if r['count'] <= location_count_threshold else r[store_name_column], axis=1)
+    coffee_name_cnt.set_index(store_name_column, inplace=True, drop=True)
+
+    return df.join(coffee_name_cnt['dest_name_category'], on=store_name_column)
