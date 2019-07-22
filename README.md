@@ -1,16 +1,13 @@
 # geoai-retail
 
-A short description of the project.
+GeoAI-Retail is a collection of resources streamlining the process of performing _customer 
+centric_ analysis.
 
 ## Project Organization
-------------
 
 ```
     ├── LICENSE
-    ├── Makefile           <- Makefile with commands like `make data`
-	├── make.bat           <- Windows batch file with commands like `make data`
 	├── setup.py           <- Setup script for the library (geoai-retail)
-	├── .env               <- Any environment variables here.
     ├── README.md          <- The top-level README for developers using this project.
     │
     ├── arcgis             <- Root location for ArcGIS Pro project created as part of
@@ -24,13 +21,13 @@ A short description of the project.
     |   │                     only generated if `arcpy` is available.
     |   │
     │   ├── processed      <- The final, canonical data sets for modeling.
-    │   └── raw            <- The original, immutable data dump.
+    │   |── raw            <- The original, immutable data dump.
+    |       └── raw.gdb    <- Raw data unchanged and intended to be a starting point for analysis.
     │
     ├── docs               <- A default Sphinx project; see sphinx-doc.org for details
     │
     ├── models             <- Trained and serialized models, model predictions, or model summaries
-    |   │                     
-	│   └── data_processing_tempate.ipynb
+    |
     ├── notebooks          <- Jupyter notebooks. Naming convention is a 2 digits (for ordering),
     │                         descriptive name. e.g.: 01_exploratory_analysis.ipynb
     │
@@ -45,12 +42,11 @@ A short description of the project.
     │
     └── src                <- Source code for use in this project.
         │
-        │
         ├── data           <- Scripts to download or generate data
         │   └── make_dataset.py
         │
         └── geoai-retail <- Library to contain the bulk of code used in this project. 
-												  This is a module. 
+							This is a module. 
 ```
 
 <p><small>Project based on the <a target="_blank" href="https://github.com/knu2xs/cookiecutter-geoai">cookiecutter GeoAI project template</a>. This template, in turn, is simply an extension and light modification of the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>

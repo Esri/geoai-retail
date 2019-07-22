@@ -85,4 +85,8 @@ models/
 # Mac OS-specific storage files
 **/*.DS_Store
 
+# local config settings
 **/*config.py
+
+# testing cache
+**/*.pytest_cache

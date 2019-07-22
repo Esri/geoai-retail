@@ -88,8 +88,57 @@ def get_store_open_year_month_list(target_lyr, target_open_date_field):
     return open_ym_lst
 
 
-def get_nearest_area_to_target_by_id(network_dataset, target_fc, target_id_fld, origin_areas_fc, origin_areas_id_fld,
-                                     destination_count=1, maximum_near_distance=False, centroid_weighting_fc=None):
+def get_centroid_local(origin_areas_fc, origin_areas_id_fld, centroid_weighting_fc=None):
+    """
+    Calculate the centroids for origin polygons, optionally using a weighting feature class.
+    :param origin_areas_fc: Feature Layer or String path to feature class
+        Feature layer or path to feature class for geographies used as origins for analysis.
+    :param origin_areas_id_fld: String
+        String field name containing unique identifier for contributing geographic areas.
+    :param centroid_weighting_fc: String path to point feature class
+        Path to point feature class to be used to weight centroid calculation for routing points. Typicaly this will be
+        a block point centroid feature class.
+    :return: Feature layer with centroid points.
+    """
+    # get the geometry type of the origin_areas_feature class, typically a polygon
+    areas_geom = arcpy.Describe(origin_areas_fc).shapeType
+
+    # if the geometry is not a point or multipoint and a centroid weighting feature class is not provided
+    if not (areas_geom == 'Point' or areas_geom == 'Multipoint') and not centroid_weighting_fc:
+
+        # get the centroid geometry
+        geog_fc = arcpy.management.FeatureToPoint(
+            origin_areas_fc,
+            os.path.join(arcpy.env.scratchGDB, 'temp_geog_{}'.format(uuid.uuid4().hex)),
+            'INSIDE'
+        )[0]
+
+        # make a layer to work with
+        origin_lyr = arcpy.management.MakeFeatureLayer(geog_fc)[0]
+
+    # if the geometry is not a point or multipoint, and a centroid weighting feature class is provided
+    elif not (areas_geom == 'Point' or areas_geom == 'Multipoint') and centroid_weighting_fc:
+
+        # ensure the geometry type is a point, and if not, make it points
+        weighting_geom = arcpy.Describe(centroid_weighting_fc).shapeType
+        if weighting_geom != 'Point':
+            weighting_fc = arcpy.management.FeatureToPoint(centroid_weighting_fc, 'in_memory/weighting_points')[0]
+
+        # get the area ids on the weighting feature class points
+        areas_id_fc = arcpy.analysis.Identity(weighting_fc, origin_areas_fc, 'in_memory/temp_points')[0]
+
+        # calculate the weighted center for the centroid feature class
+        origin_lyr = arcpy.stats.MeanCenter(areas_id_fc, 'in_memory/temp_centroids', Case_Field=origin_areas_id_fld)[0]
+
+        # otherwise, if points, simply create the feature layer
+    else:
+        origin_lyr = arcpy.management.MakeFeatureLayer(origin_areas_fc)[0]
+
+    return origin_lyr
+
+
+def solve_closest(network_dataset, target_fc, target_id_fld, origin_areas_fc, origin_areas_id_fld,
+                  destination_count=1, maximum_near_distance=False, centroid_weighting_fc=None):
     """
     Solve for nearest store location(s) to contributing geographies, typically census areas.
     :param network_dataset: String path to ArcGIS Network Dataset
@@ -144,10 +193,6 @@ def get_nearest_area_to_target_by_id(network_dataset, target_fc, target_id_fld, 
 
         # calculate the weighted center for the centroid feature class
         geog_lyr = arcpy.stats.MeanCenter(areas_id_fc, 'in_memory/temp_centroids', Case_Field=origin_areas_id_fld)[0]
-
-        # get a list of area ID's without points in them, and then get a list of those from the origin not in this list
-        # solved_area_id_lst = [r[0] for r in arcpy.da.SearchCursor(geog_lyr, origin_areas_id_fld)]
-        # unsolved_area_id_lst =
 
     # otherwise, if points, simply create the feature layer
     else:
@@ -259,7 +304,7 @@ def get_nearest_dataframe(network_dataset, target_fc, target_id_fld, area_fc, ar
                           max_near_dist=True, centroid_weighting_fc=None):
 
     # create a network route features
-    routes_feature_layer = get_nearest_area_to_target_by_id(
+    routes_feature_layer = solve_closest(
         network_dataset=network_dataset,
         target_fc=target_fc,
         target_id_fld=target_id_fld,
