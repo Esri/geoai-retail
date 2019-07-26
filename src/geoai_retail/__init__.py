@@ -4,5 +4,4 @@ __author__ = 'Joel Mccune'
 __license__ = 'GNU AGPLv3'
 __copyright__ = 'Copyright 2019 by Joel McCune'
 
-import proximity_rest as proximity
-import utils
+import geoai_retail.proximity_local as proximity

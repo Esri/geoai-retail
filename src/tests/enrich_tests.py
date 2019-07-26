@@ -1,6 +1,6 @@
 import os
 import arcpy
-from .. import enrich
+from src.geoai_retail import enrich
 import pandas as pd
 
 test_dir = os.path.abspath('../data/test')
