@@ -56,12 +56,10 @@ def test_get_closest_df(origin_df, dest_df):
 
     assert(isinstance(closest_df, pd.DataFrame))
 
+
 def test_closest_dataframe_from_origins_destinations(origin_df, dest_df):
 
     destination_count = 4
-
-    origin_df = proximity.prep_sdf_for_nearest(origin_df, 'ID')
-    dest_df = proximity.prep_sdf_for_nearest(dest_df, 'LOCNUM')
 
     closest_df = proximity.closest_dataframe_from_origins_destinations(origin_df, 'ID', dest_df, 'LOCNUM',
                                                                        network_dataset=network_dataset,

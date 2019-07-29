@@ -7,6 +7,8 @@ from arcgis.geometry import Geometry
 from arcgis.gis import GIS
 from arcgis.env import active_gis
 import numpy as np
+import pandas as pd
+
 
 def clean_columns(column_list):
     """

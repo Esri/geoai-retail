@@ -1,14 +1,13 @@
-import pandas as pd
-from arcgis.features import GeoAccessor
-from arcgis.geometry import Geometry
 import math
 import os
-import uuid
 import tempfile
-import arcpy
+import uuid
 
-import sys
-sys.path.append('./')
+from arcgis.features import GeoAccessor
+from arcgis.geometry import Geometry
+import arcpy
+import pandas as pd
+
 import geoai_retail.utils as utils
 
 # location to store temp files if necessary
@@ -323,7 +322,8 @@ def explode_closest_rank_dataframe(closest_df, origin_id_col='origin_id', rank_c
 
     return origin_dest_df
 
-def get_closest_solutiondefs(origins, origin_id_fld, destinations, dest_id_fld, gis=None,
+
+def get_closest_solution(origins, origin_id_fld, destinations, dest_id_fld, gis=None,
                                                 network_dataset=None, destination_count=4):
     """
     Create a closest destination dataframe using origin and destination Spatially Enabled Dataframes, but keep
@@ -404,10 +404,12 @@ def closest_dataframe_from_origins_destinations(origins, origin_id_fld, destinat
                                                 network_dataset=None, destination_count=4):
     """
     Create a closest destination dataframe using origin and destination Spatially Enabled Dataframes.
-    :param origins: Spatially Enabled Dataframe | String path to Feature Class | String url to Feature Service | String Web GIS Item ID
+    :param origins: Spatially Enabled Dataframe | String path to Feature Class | String url to Feature Service |
+        String Web GIS Item ID
         Origins in one of the supported input formats.
     :param origin_id_fld: Column in the origin points Spatially Enabled Dataframe uniquely identifying each feature
-    :param destinations: Spatially Enabled Dataframe | String path to Feature Class | String url to Feature Service | String Web GIS Item ID
+    :param destinations: Spatially Enabled Dataframe | String path to Feature Class | String url to Feature Service |
+        String Web GIS Item ID
         Destination points in one of the supported input formats.
     :param dest_id_fld: Column in the destination points Spatially Enabled Dataframe uniquely identifying each feature
     :param gis: ArcGIS Web GIS object instance with networking configured.
@@ -415,60 +417,11 @@ def closest_dataframe_from_origins_destinations(origins, origin_id_fld, destinat
     :param destination_count: Integer number of destinations to search for from every origin point.
     :return: Spatially Enabled Dataframe with a row for each origin id, and metrics for each nth destinations.
     """
-    # check to environment against inputs to determine if networking locally or remotely
-    if gis is not None and network_dataset is not None:
-        raise Exception('You can either specify a GIS object instance OR a Network Dataset, but not both.')
+    # get a closest dataframe with all the origin and destination pairs in a discrete row
+    closest_df = get_closest_solution(origins, origin_id_fld, destinations, dest_id_fld, gis=gis,
+                                      network_dataset=network_dataset, destination_count=destination_count)
 
-    # ensure the inputs are a spatially enabled dataframe
-    origin_df = utils.get_dataframe(origins, gis)
-    dest_df = utils.get_dataframe(destinations, gis)
-
-    # ensure the dataframes are in the right schema and have the right geometry
-    origin_df = prep_sdf_for_nearest(origin_df, origin_id_fld)
-    dest_df = prep_sdf_for_nearest(dest_df, dest_id_fld)
-
-    # create an environment object instance for checking settings later
-    env = utils.Environment(gis)
-
-    if gis is not None:
-
-        raise Exception('Using remote network routing is not yet implemented.')
-
-        # # get the limitations on the networking rest endpoint, and scale the analysis based on this
-        # max_records = gis._con.get(gis.properties.helperServices.asyncClosestFacility.url.rpartition('/')[0])[
-        #     'maximumRecords']
-        # max_origin_cnt = math.floor(max_records / destination_count)
-        #
-        # # if necessary, batch the analysis based on the size of the input data, and the number of destinations per origin
-        # if len(origin_df.index) > max_origin_cnt:
-        #
-        #     # process each batch, and save the results to a temp file in the temp directory
-        #     closest_csv_list = [_get_closest_csv(origin_df.iloc[idx:idx + max_origin_cnt], dest_df, destination_count, gis)
-        #                         for idx in range(0, len(origin_df.index), max_origin_cnt)]
-        #
-        #     # load all the temporary files into dataframes and combine them into a single dataframe
-        #     closest_df = pd.concat([pd.read_csv(closest_csv) for closest_csv in closest_csv_list])
-        #
-        #     # clean up the temp files
-        #     for csv_file in closest_csv_list:
-        #         os.remove(csv_file)
-        #
-        # else:
-        #     closest_df = _get_closest_df(origin_df, dest_df, destination_count, gis)
-
-    elif network_dataset is not None:
-
-        if 'Network' in env.arcpy_extensions:
-            env.arcpy_checkout_extension('Network')
-        else:
-            raise Exception('To perform network routing locally you must have access to the ArcGIS Network Analyst '
-                            'extension. It appears this extension is either not installed or not licensed.')
-
-        # run the closest analysis locally
-        closest_df = _get_closest_df_arcpy(origin_df, dest_df, destination_count, network_dataset)
-
-    # reformat the results to be a single row for each origin
-    closest_df = reformat_closest_result_dataframe(closest_df)
+    # collapse the solutions to a single record for each origin location
     origin_dest_df = explode_closest_rank_dataframe(closest_df)
 
     return origin_dest_df
