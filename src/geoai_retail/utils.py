@@ -1,10 +1,13 @@
+import importlib
+import re
+import warnings
+
 from arcgis.features import GeoAccessor, FeatureLayer
 from arcgis.geometry import Geometry
 from arcgis.gis import GIS
+from arcgis.env import active_gis
 import numpy as np
 import pandas as pd
-import os
-import re
 
 
 def clean_columns(column_list):
@@ -167,9 +170,6 @@ def add_metric_by_dest(parent_df, join_df, join_id_fld, join_metric_fld, get_dum
     # get the number of destinations being used
     dest_fld_lst = [col for col in parent_df.columns if col.startswith('destination_id_')]
 
-    # create a list of all prospective locations' names
-    location_name_lst = join_df[join_metric_fld].unique()
-
     # initialize the dataframe to iteratively receive all the data
     combined_df = parent_df
 
@@ -277,3 +277,62 @@ def add_store_name_category(df, store_name_column, location_count_threshold=1):
     coffee_name_cnt.set_index(store_name_column, inplace=True, drop=True)
 
     return df.join(coffee_name_cnt['dest_name_category'], on=store_name_column)
+
+
+class Environment:
+
+    def __init__(self, gis=None):
+        self.gis = self._check_gis(gis)
+        self._installed_lst = []
+        self._not_installed_lst = []
+        self._arcpy_extensions = []
+
+    def _check_gis(self, gis):
+        if gis is None and active_gis is not None:
+            return active_gis
+        elif gis is None:
+            return None
+        elif isinstance(gis, GIS):
+            return gis
+        else:
+            raise Exception('If passing in a GIS object instance, it must be a valid arcgis.gis.GIS object instance.')
+
+    def has_package(self, package_name):
+        if package_name in self._installed_lst:
+            return True
+        elif package_name in self._not_installed_lst:
+            return False
+        else:
+            installed = True if importlib.util.find_spec(package_name) else False
+            if installed:
+                self._installed_lst.append(package_name)
+            else:
+                self._not_installed_lst.append(package_name)
+        return installed
+
+    @property
+    def arcpy_extensions(self):
+        if len(self._arcpy_extensions) > 0:
+            return self._arcpy_extensions
+        elif not self.has_package('arcpy'):
+            warnings.warn('ArcPy is not available in your current environment.')
+            return self._arcpy_extensions
+        else:
+            extension_lst = ['3D', 'Datareviewer', 'DataInteroperability', 'Airports', 'Aeronautical', 'Bathymetry',
+                             'Nautical', 'GeoStats', 'Network', 'Spatial', 'Schematics', 'Tracking', 'JTX', 'ArcScan',
+                             'Business', 'Defense', 'Foundation' ,'Highways', 'StreetMap']
+
+            import arcpy
+            for extension in extension_lst:
+                if arcpy.CheckExtension(extension):
+                    self._arcpy_extensions.append(extension)
+            return self._arcpy_extensions
+
+    def arcpy_checkout_extension(self, extension):
+        if self.has_package('arcpy') and extension in self.arcpy_extensions:
+            import arcpy
+            arcpy.CheckOutExtension(extension)
+            return True
+        else:
+            raise Exception(f'Cannot check out {extension}. It either is not licensed, not installed, or you are not '
+                            f'using the correct reference.')

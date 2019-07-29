@@ -137,8 +137,8 @@ def get_centroid_local(origin_areas_fc, origin_areas_id_fld, centroid_weighting_
     return origin_lyr
 
 
-def solve_closest(network_dataset, target_fc, target_id_fld, origin_areas_fc, origin_areas_id_fld,
-                  destination_count=1, maximum_near_distance=False, centroid_weighting_fc=None):
+def solve_closest_local(network_dataset, target_fc, target_id_fld, origin_areas_fc, origin_areas_id_fld,
+                        destination_count=1, maximum_near_distance=False, centroid_weighting_fc=None):
     """
     Solve for nearest store location(s) to contributing geographies, typically census areas.
     :param network_dataset: String path to ArcGIS Network Dataset
@@ -276,7 +276,7 @@ def solve_closest(network_dataset, target_fc, target_id_fld, origin_areas_fc, or
 def get_area_id_for_target_points(target_fc, area_fc, area_id_fld, target_id_fld, return_data_frame=False):
     """
     Get the containing area ID for the target points.
-    :param target_fc: 
+    :param target_fc:
     :param area_fc: 
     :param area_id_fld: 
     :param target_id_fld: 
@@ -304,7 +304,7 @@ def get_nearest_dataframe(network_dataset, target_fc, target_id_fld, area_fc, ar
                           max_near_dist=True, centroid_weighting_fc=None):
 
     # create a network route features
-    routes_feature_layer = solve_closest(
+    routes_feature_layer = solve_closest_local(
         network_dataset=network_dataset,
         target_fc=target_fc,
         target_id_fld=target_id_fld,
