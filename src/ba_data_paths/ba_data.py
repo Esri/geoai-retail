@@ -1,11 +1,11 @@
 # import modules
 import itertools
 import os
-import pandas as pd
 import re
 import sys
 import xml.etree.ElementTree as ET
 
+import pandas as pd
 from arcgis.features import GeoAccessor
 import arcpy
 
@@ -83,6 +83,25 @@ class Data:
         """
         return self._get_first_child_key(r'SOFTWARE\WOW6432Node\Esri\BusinessAnalyst\Datasets', 'USA_ESRI')
 
+    @property
+    def usa_dataset(self) -> str:
+        """
+        Return the value needed for setting the environment.
+        :return: String value needed for setting the BA Data Environment setting.
+        """
+        return f'LOCAL;;{os.path.basename(self._usa_key)}'
+
+    def set_to_usa_local(self):
+        """
+        Set the environment setting to ensure using locally installed local data.
+        :return: Boolean indicating if data correctly enriched.
+        """
+        try:
+            arcpy.env.baDataSource = self.usa_dataset
+            return True
+        except:
+            return False
+
     def _get_business_analyst_key_value(self, locator_key):
         """
         In the Business Analyst key, get the value corresponding to the provided locator key.
@@ -96,7 +115,7 @@ class Data:
         return winreg.QueryValueEx(key, locator_key)[0]
 
     @property
-    def usa_locator(self):
+    def usa_locator(self) -> str:
         """
         Path to the address locator installed with Business Analyst USA data.
         :return: String directory path to the address locator installed with Business Analyst USA data.
@@ -104,7 +123,7 @@ class Data:
         return self._get_business_analyst_key_value('Locator')
 
     @property
-    def usa_network_dataset(self):
+    def usa_network_dataset(self) -> str:
         """
         Path to the network dataset installed with Business Analyst USA data.
         :return: String directory path to the network dataset installed with Business Analyst USA data.
@@ -112,7 +131,7 @@ class Data:
         return self._get_business_analyst_key_value('StreetsNetwork')
 
     @property
-    def usa_data_path(self):
+    def usa_data_path(self) -> str:
         """
         Path where the Business Analyst USA data is located.
         :return: String directory path to where the Business Analyst USA data is installed.
@@ -120,7 +139,7 @@ class Data:
 
         return self._get_business_analyst_key_value('DataInstallDir')
 
-    def _create_demographic_layer(self, feature_class_name, layer_name):
+    def _create_demographic_layer(self, feature_class_name, layer_name=None):
         """
         Esri Business Analyst standard geography layer with ID and NAME fields.
         :param feature_class_path: Name of the feature class.
@@ -136,20 +155,24 @@ class Data:
         # create layer map
         visible_fields = ['Shape', 'ID', 'NAME']
 
-        def eval_visible(field_name):
+        def _eval_visible(field_name):
             if field_name in visible_fields:
                 return 'VISIBLE'
             else:
                 return 'HIDDEN'
 
-        field_map_lst = [' '.join([f.name, f.name, eval_visible(f.name), 'NONE']) for f in arcpy.ListFields(fc_path)]
+        field_map_lst = [' '.join([f.name, f.name, _eval_visible(f.name), 'NONE']) for f in arcpy.ListFields(fc_path)]
         field_map = ';'.join(field_map_lst)
 
         # create and return the feature layer
-        return arcpy.management.MakeFeatureLayer(fc_path, field_info=field_map)[0]
+        if layer_name:
+            lyr = arcpy.management.MakeFeatureLayer(fc_path, layer_name, field_info=field_map)[0]
+        else:
+            lyr = arcpy.management.MakeFeatureLayer(fc_path, field_info=field_map)[0]
+        return lyr
 
     @property
-    def layer_block_group(self):
+    def layer_block_group(self) -> arcpy._mp.Layer:
         """
         Esri Business Analyst Census Block Group layer with ID and NAME fields.
         :return: Feature Layer
@@ -157,7 +180,7 @@ class Data:
         return self._create_demographic_layer('BlockGroups_bg', 'block_group')
 
     @property
-    def layer_cbsa(self):
+    def layer_cbsa(self) -> arcpy._mp.Layer:
         """
         Esri Business Analyst CBSA layer with ID and NAME fields.
         :return: Feature Layer
@@ -165,7 +188,7 @@ class Data:
         return self._create_demographic_layer('CBSAs_cb', 'cbsa')
 
     @property
-    def layer_census_tract(self):
+    def layer_census_tract(self) -> arcpy._mp.Layer:
         """
         Esri Business Analyst Census Tract layer with ID and NAME fields.
         :return: Feature Layer
@@ -173,7 +196,7 @@ class Data:
         return self._create_demographic_layer('CensusTracts_tr', 'census_tract')
 
     @property
-    def layer_congressional_district(self):
+    def layer_congressional_district(self) -> arcpy._mp.Layer:
         """
         Esri Business Analyst Congressional District layer with ID and NAME fields.
         :return: Feature Layer
@@ -181,7 +204,7 @@ class Data:
         return self._create_demographic_layer('CongressionalDistricts_cd', 'congressional_district')
 
     @property
-    def layer_county(self):
+    def layer_county(self) -> arcpy._mp.Layer:
         """
         Esri Business Analyst county layer with ID and NAME fields.
         :return: Feature Layer
@@ -189,7 +212,7 @@ class Data:
         return self._create_demographic_layer('Counties_cy', 'county')
 
     @property
-    def layer_county_subdivisions(self):
+    def layer_county_subdivisions(self) -> arcpy._mp.Layer:
         """
         Esri Business Analyst county subdivision layer with ID and NAME fields.
         :return: Feature Layer
@@ -197,7 +220,7 @@ class Data:
         return self._create_demographic_layer('CountySubdivisions_cs', 'county_subdivision')
 
     @property
-    def layer_dma(self):
+    def layer_dma(self) -> arcpy._mp.Layer:
         """
         Esri Business Analyst DMA layer with ID and NAME fields.
         :return: Feature Layer
@@ -205,7 +228,7 @@ class Data:
         return self._create_demographic_layer('DMAs_dm', 'dma')
 
     @property
-    def layer_places(self):
+    def layer_places(self) -> arcpy._mp.Layer:
         """
         Esri Business Analyst Census Places layer with ID and NAME fields.
         :return: Feature Layer
@@ -213,7 +236,7 @@ class Data:
         return self._create_demographic_layer('Places_pl', 'places')
 
     @property
-    def layer_states(self):
+    def layer_states(self) -> arcpy._mp.Layer:
         """
         Esri Business Analyst US States layer with ID and NAME fields.
         :return: Feature Layer
@@ -221,7 +244,7 @@ class Data:
         return self._create_demographic_layer('States_st', 'state')
 
     @property
-    def layer_postal_code(self):
+    def layer_postal_code(self) -> arcpy._mp.Layer:
         """
         Esri Business Analyst postal code (zip) layer with ID and NAME fields.
         :return: Feature Layer
@@ -259,11 +282,25 @@ class Data:
         # field list to populate with property tuples
         fld_lst = []
 
+        def _get_field_attrib(field_ele):
+            """Helper function to get field element properties out of xml files"""
+            if 'MapTo' in [itm[0] for itm in field_ele.attrib.items()]:
+                return field_ele.attrib['MapTo'], field_ele.attrib['Alias']
+            else:
+                return field_ele.attrib['Name'], field_ele.attrib['Alias']
+
+        def _is_hidden(field_ele):
+            """Helper to determine if hidden fields."""
+            if 'HideInDataBrowser' in field_ele.attrib and field_ele.attrib['HideInDataBrowser'] is True:
+                return True
+            else:
+                return False
+
         # collect any raw scalar fields
         uncalc_ele_fields = coll_root.find('./Calculators/Demographic/Fields')
         if uncalc_ele_fields:
-            fld_lst.append([(field_ele.attrib['Name'], field_ele.attrib['Alias']) for field_ele in
-                            uncalc_ele_fields.findall('Field')])
+            fld_lst.append([_get_field_attrib(field_ele) for field_ele in uncalc_ele_fields.findall('Field')
+                            if not _is_hidden(field_ele)])
 
         # collect any calculated field types
         calc_ele_fields = coll_root.find('./Calculators/Demographic/CalculatedFields')
@@ -271,11 +308,11 @@ class Data:
 
             # since there are two types of calcualted fields, account for this
             for field_type in ['PercentCalc', 'Script']:
-                single_fld_lst = [(field_ele.attrib['Name'], field_ele.attrib['Alias']) for field_ele in
-                                  calc_ele_fields.findall(field_type)]
+                single_fld_lst = [_get_field_attrib(field_ele) for field_ele in calc_ele_fields.findall(field_type)
+                                  if not _is_hidden(field_ele)]
                 fld_lst.append(single_fld_lst)
 
-                # combine the results of both uncalculated and calculated fields located into single result
+        # combine the results of both uncalculated and calculated fields located into single result
         field_lst = list(itertools.chain.from_iterable(fld_lst))
 
         # create a dataframe with the field information
@@ -288,22 +325,52 @@ class Data:
 
         return coll_df
 
-    @property
-    def fields_dataframe(self, drop_duplicates=True):
+    def _is_enrich_collection(self, coll_file):
+        """Helper to determine if core demographic enrichment and should be used."""
+        # crack open the xml file and get started
+        coll_tree = ET.parse(os.path.join(self._get_data_collection_dir(), coll_file))
+        coll_root = coll_tree.getroot()
+
+        # if collection is specifically for an infographic or report, then we do not need it
+        if coll_root.find('./Metadata').find('infographics') is None and not coll_file.endswith('_rep.xml'):
+            is_enrich = True
+        else:
+            is_enrich = False
+
+        return is_enrich
+
+    def get_enrich_vars_dataframe(self, drop_duplicates: bool = True) -> pd.DataFrame:
         collection_dir = self._get_data_collection_dir()
-        coll_df_lst = [self._get_coll_df(coll_file) for coll_file in os.listdir(collection_dir) if
-                       coll_file != 'EnrichmentPacksList.xml']
-        coll_df = pd.concat(coll_df_lst)
+
+        # get a complete list of collection files
+        coll_xml_lst = [coll_file for coll_file in os.listdir(collection_dir) if coll_file != 'EnrichmentPacksList.xml']
+
+        # filter to just those used for demographic analysis
+        coll_xml_lst = [coll_file for coll_file in coll_xml_lst if self._is_enrich_collection(coll_file)]
+
+        # get the necessary properties from the collection xml files
+        coll_df = pd.concat([self._get_coll_df(coll_file) for coll_file in coll_xml_lst])
+
         if drop_duplicates:
             coll_df.drop_duplicates('name', inplace=True)
+
+        coll_df.sort_values('enrich_str')
         return coll_df
+
+    @property
+    def enrich_vars_dataframe(self) -> pd.DataFrame:
+        return self.get_enrich_vars_dataframe()
+
+    @property
+    def enrich_vars(self) -> list:
+        return list(self.enrich_vars_dataframe['enrich_str'].values)
 
 # create instance of data for use
 data = Data()
 
 
 @property
-def to_sdf(self):
+def to_sdf(self) -> pd.DataFrame:
     # convert the layer to a spatially enabled dataframe
     df = GeoAccessor.from_featureclass(self)
 
