@@ -9,6 +9,7 @@ from geoai_retail import enrich_local as enrich
 
 enrich_template_fc = './test_data.gdb/block_groups_enrich_template'
 block_groups_fc = './test_data.gdb/block_groups'
+block_groups_big_fc = './test_data.gdb/block_groups_big'
 blocks_fc = './test_data.gdb/blocks'
 
 
@@ -58,6 +59,8 @@ def test_enriched_fields_to_csv():
     out_fields = enrich_df['enrich_field_name'].values
     contains_lst = [f in out_fields for f in enrich_fields]
 
+    os.remove(enrich_csv)
+
     assert (all(contains_lst))
 
 
@@ -92,6 +95,13 @@ def test_enrich_all_small():
 
 def test_enrich_all_over_1500():
     enrich_out = enrich.enrich_all(block_groups_fc, os.path.join(arcpy.env.scratchGDB, 'test_enrich_over_1500_all'))
+    exists = arcpy.Exists(enrich_out)
+    arcpy.management.Delete(enrich_out)
+    assert exists
+
+
+def test_enrich_all_big():
+    enrich_out = enrich.enrich_all(block_groups_big_fc, os.path.join(arcpy.env.scratchGDB, 'test_enrich_big_all'))
     exists = arcpy.Exists(enrich_out)
     arcpy.management.Delete(enrich_out)
     assert exists
