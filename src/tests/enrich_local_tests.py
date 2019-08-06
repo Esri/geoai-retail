@@ -55,7 +55,7 @@ def test_enriched_fields_to_csv():
                      'clothing_X5001_X', 'hispanicorigin_HISPPOP_CY', 'householdincome_MEDHINC_CY',
                      'householdincome_PCI_CY', 'SpendingTotal_X1001_X', 'SpendingTotal_X15001_X']
     enrich_df = pd.read_csv(enrich_csv)
-    out_fields = enrich_df.columns
+    out_fields = enrich_df['enrich_field_name'].values
     contains_lst = [f in out_fields for f in enrich_fields]
 
     assert (all(contains_lst))
@@ -77,6 +77,21 @@ def test_enrich_from_fields_table():
 
 
 def test_enrich_all_single_feature(single_feature):
+    enrich_out = enrich.enrich_all(single_feature, os.path.join(arcpy.env.scratchGDB, 'test_enrich_single_all'))
+    exists = arcpy.Exists(enrich_out)
+    arcpy.management.Delete(enrich_out)
+    assert exists
 
-    enrich_out = enrich.enrich_all(single_feature, os.path.join(arcpy.env.scratchGDB, 'test_enrich_all'))
-    assert(arcpy.Exists(enrich_out))
+
+def test_enrich_all_small():
+    enrich_out = enrich.enrich_all(block_groups_fc, os.path.join(arcpy.env.scratchGDB, 'test_enrich_small_all'))
+    exists = arcpy.Exists(enrich_out)
+    arcpy.management.Delete(enrich_out)
+    assert exists
+
+
+def test_enrich_all_over_1500():
+    enrich_out = enrich.enrich_all(block_groups_fc, os.path.join(arcpy.env.scratchGDB, 'test_enrich_over_1500_all'))
+    exists = arcpy.Exists(enrich_out)
+    arcpy.management.Delete(enrich_out)
+    assert exists

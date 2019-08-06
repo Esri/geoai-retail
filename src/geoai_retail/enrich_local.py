@@ -1,10 +1,4 @@
-from glob import glob
-import logging
-import math
 import os
-import queue
-import threading
-import multiprocessing
 
 import arcpy
 import pandas as pd
