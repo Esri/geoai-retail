@@ -76,7 +76,7 @@ def test_enrich_from_fields_table():
     assert(all(contains_lst))
 
 
-def test_enrich_all(single_feature):
+def test_enrich_all_single_feature(single_feature):
 
     enrich_out = enrich.enrich_all(single_feature, os.path.join(arcpy.env.scratchGDB, 'test_enrich_all'))
     assert(arcpy.Exists(enrich_out))
