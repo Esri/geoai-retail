@@ -1,5 +1,6 @@
 import os
 
+from arcgis.features import GeoAccessor
 import arcpy
 import pandas as pd
 
@@ -30,8 +31,8 @@ def _get_enrich_var_lst(enrich_template_fc: str) -> list:
     return list(enrich_df['enrich_str'].values)
 
 
-def _enrich_wrapper(enrich_var_lst: list, feature_class_to_enrich: str, output_enriched_feature_class: str,
-                    enrich_threshold: int = 500) -> str:
+def _enrich_wrapper(enrich_var_lst:list, feature_class_to_enrich:str, output_enriched_feature_class:str,
+                    enrich_threshold:int=500, enrich_variable_chunk_size:int=200) -> str:
     """Wrapper around Enrich function to make it work"""
     # ensure using local ba_data
     ba_data.set_to_usa_local()
@@ -70,12 +71,28 @@ def _enrich_wrapper(enrich_var_lst: list, feature_class_to_enrich: str, output_e
                 where_clause=query_chunk
             )[0]
 
-            # enrich just these features
-            enrich_fc = arcpy.ba.EnrichLayer(
-                in_features=tmp_features,
-                out_feature_class=os.path.join(out_gdb, f'tmp_enrich{enrich_idx:04d}'),
-                variables=enrich_var_lst
-            )[0]
+            # iterate to get all the variables
+            for var_idx, chunk_vars in enumerate(blow_chunks(ba_data.enrich_vars, enrich_variable_chunk_size)):
+
+                # write the run result to the output geodatabase
+                this_enrich_fc = arcpy.ba.EnrichLayer(
+                    in_features=tmp_features,
+                    out_feature_class=os.path.join(out_gdb, 'temp_enrich_fc'),
+                    variables=chunk_vars
+                )[0]
+
+                # if the first run, simply push to a new Pandas Dataframe
+                if var_idx == 0:
+                    enrich_df = GeoAccessor.from_featureclass(this_enrich_fc)
+
+                # if subsequent run, just add the new enrichement variables onto the original dataframe
+                else:
+                    this_enrich_df = GeoAccessor.from_featureclass(this_enrich_fc)
+                    new_cols = this_enrich_df.columns.difference(enrich_df.columns)
+                    enrich_df.merge(this_enrich_df[new_cols], left_index=True, right_index=True)
+
+            # save out the dataframe to a feature class
+            enrich_fc = enrich_df.spatial.to_featureclass(os.path.join(out_gdb, f'tmp_enrich_{enrich_idx:04d}'))
 
             # delete the temporary input ba_data
             arcpy.management.Delete(tmp_features)
@@ -102,8 +119,8 @@ def _enrich_wrapper(enrich_var_lst: list, feature_class_to_enrich: str, output_e
     return enrich_fc
 
 
-def enrich_from_enriched(enrich_template_feature_class: str, feature_class_to_enrich: str,
-                         output_enriched_feature_class: str) -> str:
+def enrich_from_enriched(enrich_template_feature_class:str, feature_class_to_enrich:str,
+                         output_enriched_feature_class:str) -> str:
     """
     Enrich a new dataset using a previously enriched dataset as a template.
     :param enrich_template_feature_class: String path to a previously enriched feature class.
