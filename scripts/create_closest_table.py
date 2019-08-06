@@ -7,8 +7,8 @@ import config
 from proximity_rest import *
 import utils
 
-raw_gdb = os.path.abspath(r'../data/raw/raw.gdb')
-int_gdb = os.path.abspath(r'../data/interim/interim.gdb')
+raw_gdb = os.path.abspath(r'../ba_data/raw/raw.gdb')
+int_gdb = os.path.abspath(r'../ba_data/interim/interim.gdb')
 
 dest_fc = os.path.join(int_gdb, 'pdx_businesses_home_goods')
 dest_id_fld = 'LOCNUM'
@@ -23,5 +23,5 @@ ent_gis = GIS(config.ent_url, username=config.ent_user, password=config.ent_pass
 
 closest_df = closest_dataframe_from_origins_destinations(origin_fc, origin_id_fld, dest_fc, dest_id_fld, ent_gis)
 
-closest_df.to_csv('../data/interim/closest_blocks_pdx_home_goods.csv')
+closest_df.to_csv('../ba_data/interim/closest_blocks_pdx_home_goods.csv')
 print('Success!')

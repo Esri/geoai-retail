@@ -35,7 +35,7 @@ def get_max_near_dist(stores_layer):
     """
     Get the maximum geodesic distance between stores.
     """
-    # create a location for temporary data
+    # create a location for temporary ba_data
     temp_table = r'in_memory\near_table_{}'.format(uuid.uuid4().hex)
 
     # if only one location, cannot generate a near table, and default to 120 miles
@@ -287,7 +287,7 @@ def get_area_id_for_target_points(target_fc, area_fc, area_id_fld, target_id_fld
     fc_name = 'target_intersect_{}'.format(uuid.uuid4().hex)
     stores_with_geog = arcpy.analysis.Intersect([target_fc, area_fc], os.path.join(arcpy.env.scratchGDB, fc_name))
 
-    # use a dataframe to clean up the output tabular data
+    # use a dataframe to clean up the output tabular ba_data
     stores_geog_df = GeoAccessor.from_featureclass(stores_with_geog)
     stores_geog_df = stores_geog_df[[target_id_fld, area_id_fld, 'SHAPE']].copy()
     stores_geog_df.columns = ['target_id', 'area_target_id', 'SHAPE']
@@ -317,7 +317,7 @@ def get_nearest_dataframe(network_dataset, target_fc, target_id_fld, area_fc, ar
     # if more than one destination was specified
     if destination_count > 1:
 
-        # get the data frame with facility rank from the route solution
+        # get the ba_data frame with facility rank from the route solution
         df_raw = pd.DataFrame(
             data=[r for r in arcpy.da.SearchCursor(
                 routes_feature_layer,
@@ -335,7 +335,7 @@ def get_nearest_dataframe(network_dataset, target_fc, target_id_fld, area_fc, ar
         df_raw['proximity_time'] = df_raw.apply(lambda r: 0 if r[4] == r[5] else r[2], axis=1)
         df_raw['proximity_miles'] = df_raw.apply(lambda r: 0 if r[4] == r[5] else r[3], axis=1)
 
-        # save variable names to use for organizing data
+        # save variable names to use for organizing ba_data
         row_lst = ['proximity_time', 'proximity_miles', 'area_target_id']
         unique_col = 'rank'
         index_col = 'area_contrib_id'
@@ -356,7 +356,7 @@ def get_nearest_dataframe(network_dataset, target_fc, target_id_fld, area_fc, ar
                 # create a new column name from the unique value and the original row name
                 new_name = "{}_{}".format(row, unique_val)
 
-                # filter the data in the column with the unique value
+                # filter the ba_data in the column with the unique value
                 df_temp[new_name] = df_filtered[row].values
 
             # set the index to the geographic contributing id for joining

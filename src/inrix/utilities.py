@@ -53,8 +53,8 @@ class TAZ(object):
         :param device_ids: If searching for specific devices, specify device ids separated by commas.
         :param start_date_time: Starting datetime specified as yyyy-MM-ddTHH:mm in UTC or zulu.
         :param end_date_time: Ending datetime specified as yyyy-MM-ddTHH:mm in UTC or zulu.
-        :param provider_type: Type of data to filter, either explicitly "consumer" or "fleet".
-        :return: Pandas data frame with all the trips either starting or ending in the specified geometry.
+        :param provider_type: Type of ba_data to filter, either explicitly "consumer" or "fleet".
+        :return: Pandas ba_data frame with all the trips either starting or ending in the specified geometry.
         """
 
         resp = self.session.get(
@@ -63,14 +63,14 @@ class TAZ(object):
         )
 
         if resp.status_code == 200:
-            json_data = resp.json()['data']
+            json_data = resp.json()['ba_data']
             df = pd.DataFrame(json_data)
         else:
             raise Exception('Request error: {}'.format(resp.json()['description']))
 
         while resp.json()['paging']['nextCursor'] is not None:
             resp = self.session.get(resp.json()['paging']['nextCursor'])
-            sdf_page = pd.DataFrame(resp.json()['data'])
+            sdf_page = pd.DataFrame(resp.json()['ba_data'])
             df = pd.concat([df, sdf_page])
 
         if len(df.index):
@@ -107,7 +107,7 @@ class TAZ(object):
 
     def get_trip_destination_spatial_dataframe(self, latitude, longitude, destination_radius='100m'):
         """
-        Given a provided points input data frame, return a spatial data frame with all contributing trips.
+        Given a provided points input ba_data frame, return a spatial ba_data frame with all contributing trips.
         :param longitude: X coordinate for the point descrbing the destination location.
         :param latitude: Y coordinate for the point describing the destination location.
         :param destination_radius: Radius to search around the destination coordinates for trips.

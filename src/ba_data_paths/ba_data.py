@@ -15,7 +15,7 @@ else:
     import _winreg as winreg
 
 
-class Data:
+class BA_Data:
 
     def __init__(self):
         pass
@@ -78,8 +78,8 @@ class Data:
     @property
     def _usa_key(self):
         """
-        Get the key for the current data installation of Business Analyst data.
-        :return: Key for the current data installation of Business Analyst data.
+        Get the key for the current ba_data installation of Business Analyst ba_data.
+        :return: Key for the current ba_data installation of Business Analyst ba_data.
         """
         return self._get_first_child_key(r'SOFTWARE\WOW6432Node\Esri\BusinessAnalyst\Datasets', 'USA_ESRI')
 
@@ -93,8 +93,8 @@ class Data:
 
     def set_to_usa_local(self):
         """
-        Set the environment setting to ensure using locally installed local data.
-        :return: Boolean indicating if data correctly enriched.
+        Set the environment setting to ensure using locally installed local ba_data.
+        :return: Boolean indicating if ba_data correctly enriched.
         """
         try:
             arcpy.env.baDataSource = self.usa_dataset
@@ -108,7 +108,7 @@ class Data:
         :param locator_key: Locator key.
         :return: Key value.
         """
-        # open the key to the current installation of Business Analyst data
+        # open the key to the current installation of Business Analyst ba_data
         key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, self._usa_key)
 
         # query the value of the locator key
@@ -117,24 +117,24 @@ class Data:
     @property
     def usa_locator(self) -> str:
         """
-        Path to the address locator installed with Business Analyst USA data.
-        :return: String directory path to the address locator installed with Business Analyst USA data.
+        Path to the address locator installed with Business Analyst USA ba_data.
+        :return: String directory path to the address locator installed with Business Analyst USA ba_data.
         """
         return self._get_business_analyst_key_value('Locator')
 
     @property
     def usa_network_dataset(self) -> str:
         """
-        Path to the network dataset installed with Business Analyst USA data.
-        :return: String directory path to the network dataset installed with Business Analyst USA data.
+        Path to the network dataset installed with Business Analyst USA ba_data.
+        :return: String directory path to the network dataset installed with Business Analyst USA ba_data.
         """
         return self._get_business_analyst_key_value('StreetsNetwork')
 
     @property
     def usa_data_path(self) -> str:
         """
-        Path where the Business Analyst USA data is located.
-        :return: String directory path to where the Business Analyst USA data is installed.
+        Path where the Business Analyst USA ba_data is located.
+        :return: String directory path to where the Business Analyst USA ba_data is installed.
         """
 
         return self._get_business_analyst_key_value('DataInstallDir')
@@ -252,7 +252,7 @@ class Data:
         return self._create_demographic_layer('ZIPCodes_zp', 'postal_code')
 
     def _get_data_collection_dir(self):
-        """Helper function to retrieve location to find the data collection files"""
+        """Helper function to retrieve location to find the ba_data collection files"""
         dataset_config_file = os.path.join(self.usa_data_path, 'dataset_config.xml')
         config_tree = ET.parse(dataset_config_file)
         config_root = config_tree.getroot()
@@ -260,7 +260,7 @@ class Data:
         return os.path.join(self.usa_data_path, config_dir)
 
     def _get_out_field_name(self, ge_field_name):
-        """Helper function to create field names to look for when trying to enrich from previously enriched data."""
+        """Helper function to create field names to look for when trying to enrich from previously enriched ba_data."""
         out_field_name = ge_field_name.replace(".", "_")
 
         # if string starts with a set of digits, replace them with Fdigits
@@ -325,28 +325,11 @@ class Data:
 
         return coll_df
 
-    def _is_enrich_collection(self, coll_file):
-        """Helper to determine if core demographic enrichment and should be used."""
-        # crack open the xml file and get started
-        coll_tree = ET.parse(os.path.join(self._get_data_collection_dir(), coll_file))
-        coll_root = coll_tree.getroot()
-
-        # if collection is specifically for an infographic or report, then we do not need it
-        if coll_root.find('./Metadata').find('infographics') is None and not coll_file.endswith('_rep.xml'):
-            is_enrich = True
-        else:
-            is_enrich = False
-
-        return is_enrich
-
-    def get_enrich_vars_dataframe(self, drop_duplicates: bool = True) -> pd.DataFrame:
+    def get_enrich_vars_dataframe(self, drop_duplicates:bool=True) -> pd.DataFrame:
         collection_dir = self._get_data_collection_dir()
 
         # get a complete list of collection files
         coll_xml_lst = [coll_file for coll_file in os.listdir(collection_dir) if coll_file != 'EnrichmentPacksList.xml']
-
-        # filter to just those used for demographic analysis
-        coll_xml_lst = [coll_file for coll_file in coll_xml_lst if self._is_enrich_collection(coll_file)]
 
         # get the necessary properties from the collection xml files
         coll_df = pd.concat([self._get_coll_df(coll_file) for coll_file in coll_xml_lst])
@@ -365,8 +348,8 @@ class Data:
     def enrich_vars(self) -> list:
         return list(self.enrich_vars_dataframe['enrich_str'].values)
 
-# create instance of data for use
-data = Data()
+# create instance of ba_data for use
+ba_data = BA_Data()
 
 
 @property

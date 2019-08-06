@@ -3,7 +3,7 @@ import arcpy
 from src.geoai_retail import enrich
 import pandas as pd
 
-test_dir = os.path.abspath('../data/test')
+test_dir = os.path.abspath('../ba_data/test')
 test_gdb = os.path.join(test_dir, 'test.gdb')
 zip_fc = os.path.join(test_gdb, 'zip_three_test')
 zip_6k_fc = os.path.join(test_gdb, 'zip_6k_test')

@@ -75,7 +75,7 @@ target/
 # Jupyter NB Checkpoints
 .ipynb_checkpoints/
 
-# exclude data from source control by default
+# exclude ba_data from source control by default
 data/
 models/
 
@@ -90,3 +90,6 @@ models/
 
 # testing cache
 **/*.pytest_cache
+
+# logfiles
+**/*.log

@@ -86,7 +86,7 @@ def prep_feature_service_for_nearest(item_id, id_fld, gis):
         Dataframe.
     :param item_id: The item ID in the Web GIS the feature service can be found at.
     :param id_fld: The ID field uniquely identifying each resource.
-    :param gis: The Web GIS object instance to use for connecting to get the data.
+    :param gis: The Web GIS object instance to use for connecting to get the ba_data.
     :return: Spatially Enabled Dataframe with correct schema for closest network analysis.
     """
     df = gis.content.get(item_id).layers[0].query(out_sr=4326, as_df=True)
@@ -174,7 +174,7 @@ def reformat_closest_result_dataframe(closest_df):
 def explode_closest_rank_dataframe(closest_df, origin_id_col='origin_id', rank_col='destination_rank',
                                    dest_id_col='destination_id'):
     """
-    Effectively explode out or pivot the data so there is only a single record for each origin.
+    Effectively explode out or pivot the ba_data so there is only a single record for each origin.
     :param closest_df: Spatially Enabled Dataframe reformatted from the raw output of find nearest.
     :param origin_id_col: Column uniquely identifying each origin - default 'origin_id'
     :param rank_col: Column identifying the rank of each destination - default 'destination_rank'
@@ -201,7 +201,7 @@ def explode_closest_rank_dataframe(closest_df, origin_id_col='origin_id', rank_c
             # create a new column name from the unique value and the original row name
             new_name = f'{col}_{rank_val:02d}'
 
-            # filter the data in the column with the unique value
+            # filter the ba_data in the column with the unique value
             df_temp[new_name] = rank_df[col].values
 
         # set the index to the origin id for joining
@@ -239,7 +239,7 @@ def closest_dataframe_from_origins_destinations(origins, origin_id_fld, destinat
         'maximumRecords']
     max_origin_cnt = math.floor(max_records / dest_cnt)
 
-    # if necessary, batch the analysis based on the size of the input data, and the number of destinations per origin
+    # if necessary, batch the analysis based on the size of the input ba_data, and the number of destinations per origin
     if len(origin_df.index) > max_origin_cnt:
 
         # process each batch, and save the results to a temp file in the temp directory

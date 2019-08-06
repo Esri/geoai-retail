@@ -1,4 +1,6 @@
 import importlib
+import logging
+import math
 import re
 import warnings
 
@@ -109,7 +111,7 @@ def add_metric_by_origin_dest(parent_df, join_df, join_metric_fld, fill_na_value
     :param join_metric_fld: The column containing the metric to be added.
     :param fill_na_value: Optional - String or integer to fill null values with. If not used, null values will not be
         filled.
-    :return: Dataframe with the data added onto the original origin to multiple destination table.
+    :return: Dataframe with the ba_data added onto the original origin to multiple destination table.
     """
     # ensure everything is matching field types so the joins will work
     origin_dtype = parent_df['origin_id'].dtype
@@ -123,7 +125,7 @@ def add_metric_by_origin_dest(parent_df, join_df, join_metric_fld, fill_na_value
     # get the number of destinations being used
     dest_fld_lst = [col for col in parent_df.columns if col.startswith('destination_id_')]
 
-    # initialize the dataframe to iteratively receive all the data
+    # initialize the dataframe to iteratively receive all the ba_data
     combined_df = parent_df
 
     # for every destination
@@ -155,7 +157,7 @@ def add_metric_by_dest(parent_df, join_df, join_id_fld, join_metric_fld, get_dum
     :param get_dummies: Optional - Boolean indicating if make dummies should be run to explode out categorical values.
     :param fill_na_value: Optional - String or integer to fill null values with. If not used, null values will not be
         filled.
-    :return: Dataframe with the data added onto the original origin to multiple destination table.
+    :return: Dataframe with the ba_data added onto the original origin to multiple destination table.
     """
     # ensure everything is matching field types so the joins will work
     if parent_df['origin_id'].dtype == 'O':
@@ -170,7 +172,7 @@ def add_metric_by_dest(parent_df, join_df, join_id_fld, join_metric_fld, get_dum
     # get the number of destinations being used
     dest_fld_lst = [col for col in parent_df.columns if col.startswith('destination_id_')]
 
-    # initialize the dataframe to iteratively receive all the data
+    # initialize the dataframe to iteratively receive all the ba_data
     combined_df = parent_df
 
     # for every destination
@@ -209,22 +211,22 @@ def add_normalized_columns_to_closest_dataframe(closest_df, closest_factor_fld_r
     :param closest_df: Dataframe formatted from closest analysis with multiple destination locations.
     :param closest_factor_fld_root: The field room pattern to be normalized - the part of the name prefixing the _01
         numbering scheme.
-    :param normalize_df: The dataframe containing the data to be used in normalizing the metric.
-    :param normalize_id_fld: The field in the dataframe with a geographic identifier able to be used to join the data
+    :param normalize_df: The dataframe containing the ba_data to be used in normalizing the metric.
+    :param normalize_id_fld: The field in the dataframe with a geographic identifier able to be used to join the ba_data
         together.
-    :param normalize_fld: The field with values to be used as the denominator when normalizing the data.
+    :param normalize_fld: The field with values to be used as the denominator when normalizing the ba_data.
     :param output_normalize_field_name: Field name to be used for the normalized output fields.
     :param fill_na: Optional - If the normalized fields are null, the value to fill in.
     :param drop_original_columns: Boolean - whether or not to drop the original columns.
     :return:
     """
-    # get the data type the normalize join field needs to be
+    # get the ba_data type the normalize join field needs to be
     if closest_df['origin_id'].dtype == 'O':
         convert_dtype = str
     else:
         convert_dtype = closest_df['origin_id'].dtype
 
-    # convert the normalize join field to this data type, make this the index, and extract this single series out
+    # convert the normalize join field to this ba_data type, make this the index, and extract this single series out
     normalize_df[normalize_id_fld] = normalize_df[normalize_id_fld].astype(convert_dtype)
     normalize_df = normalize_df.set_index(normalize_id_fld)
     normalize_srs = normalize_df[normalize_fld]
@@ -336,3 +338,37 @@ class Environment:
         else:
             raise Exception(f'Cannot check out {extension}. It either is not licensed, not installed, or you are not '
                             f'using the correct reference.')
+
+
+def get_logger(loglevel:str='WARNING', logfile:str=None) -> logging.Logger:
+    """
+    Make logging much easier by outputting directly to console and local logfile.
+    :param loglevel: 'CRITICAL' | 'ERROR' | 'WARNING' | 'INFO' | 'DEBUG' - default 'WARNING'
+    :param logfile: Optional path to where to save logfile.
+    :return: Path to saved logfile.
+    """
+    logger = logging.getLogger(__name__)
+    logger.setLevel(loglevel)
+
+    c_handler = logging.StreamHandler()
+    if logfile is None:
+        f_handler = logging.FileHandler(f'{__name__}_logfile.log')
+    else:
+        f_handler = logging.FileHandler(logfile)
+
+    for handler in [c_handler, f_handler]:
+        handler.setLevel('DEBUG')
+        handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+        logger.addHandler(handler)
+
+    return logger
+
+
+def blow_chunks(iterable:iter, chunk_size:int) -> list:
+    """
+    Make it easier to chunk an iterable, typically a list, into a list containing sublists for processing.
+    :param iterable: Any iterable of objects needing to be subdivided.
+    :param chunk_size: Size of sublists to create.
+    :return: List original objects in sublists defined by the size of the sublist.
+    """
+    return [iterable[i * chunk_size: (i + 1) * chunk_size] for i in range(math.ceil(len(iterable)/chunk_size))]

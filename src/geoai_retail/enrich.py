@@ -103,7 +103,7 @@ def _enrich_using_enrich_dataframe(enrich_df, in_fc, out_fc):
     # ensure the path is being used for the input feature class since it could be a layer
     in_pth = arcpy.Describe(in_fc).catalogPath
 
-    # since the Enrich tool pukes with too much data, get the count and batch the process
+    # since the Enrich tool pukes with too much ba_data, get the count and batch the process
     feature_count = int(arcpy.management.GetCount(in_pth)[0])
 
     if feature_count > enrich_threshold:

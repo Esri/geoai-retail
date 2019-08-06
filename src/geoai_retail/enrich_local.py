@@ -1,36 +1,25 @@
 from glob import glob
+import logging
 import math
 import os
+import queue
+import threading
+import multiprocessing
 
 import arcpy
 import pandas as pd
 
 from ba_data_paths import ba_data
+from geoai_retail.utils import get_logger, blow_chunks
 
-# get the path to the installed documentation where the variable information is stored
-ba_xls_search_string = search_string = os.path.join(ba_data.usa_data_path,
-                                                    'Documentation\\*_BA_Desktop_Variable_and_Report_List.xlsx')
-ba_xls = glob(search_string)[0]
-
-
-def _read_ba_xls_sheet(sheet):
-    """Get documented variables into a complete list from a sheet in the documentation workbook."""
-    # read the sheet in the workbook
-    df = pd.read_excel(ba_xls, sheet_name=sheet, usecols=[1, 2, 3, 4, 5], header=5)
-
-    # account for some naming inconsistencies
-    df.columns = ['category_description' if col == 'Category' or col == 'Category Name' else col for col in df.columns]
-
-    # replace spaces with underscores and lowercase everything
-    df.columns = [col.lower().replace(' ', '_') for col in df.columns]
-
-    return df
+# get a logger to track issues
+logger = get_logger('DEBUG', './enrich_local.log')
 
 
-def _get_enrich_var_df(enrich_template_fc):
+def _get_enrich_var_df(enrich_template_fc: str) -> pd.DataFrame:
     """Get the enrichment variable dataframe."""
     # get a dataframe of all the available enrichment fields
-    ba_flds_df = ba_data.fields_dataframe
+    ba_flds_df = ba_data.get_enrich_vars_dataframe(drop_duplicates=False)
 
     # get the list of fields from the enrichment template feature class
     fc_enrich_flds = [f.name.upper() for f in arcpy.ListFields(enrich_template_fc)]
@@ -39,7 +28,7 @@ def _get_enrich_var_df(enrich_template_fc):
     return ba_flds_df[ba_flds_df['enrich_field_name'].str.upper().isin(fc_enrich_flds)]
 
 
-def _get_enrich_var_lst(enrich_template_fc):
+def _get_enrich_var_lst(enrich_template_fc: str) -> list:
     """Get the enrichment variable list properly formatted for the Enrich Layer tool."""
     enrich_df = _get_enrich_var_df(enrich_template_fc)
 
@@ -47,20 +36,18 @@ def _get_enrich_var_lst(enrich_template_fc):
     return list(enrich_df['enrich_str'].values)
 
 
-def _enrich_wrapper(enrich_var_lst, feature_class_to_enrich, output_enriched_feature_class):
+def _enrich_wrapper(enrich_var_lst: list, feature_class_to_enrich: str, output_enriched_feature_class: str,
+                    enrich_threshold: int = 500) -> str:
     """Wrapper around Enrich function to make it work"""
-    enrich_threshold = 15000  # roughly the maximum number of features the enrich tool has reliably handled for me
-    select_threshold = 1000  # roughly the maximum number of features I've been able to select at a time
-
-    # get the enrich variables and combine into semicolon separated string
-    enrich_string = ';'.join(enrich_var_lst)
+    # ensure using local ba_data
+    ba_data.set_to_usa_local()
 
     # ensure the path is being used for the input feature class since it could be a layer
     enrich_fc = arcpy.Describe(feature_class_to_enrich).catalogPath
+    out_gdb = os.path.dirname(output_enriched_feature_class)
 
-    # since the Enrich tool pukes with too much data, get the count and batch the process
+    # since the Enrich tool pukes with too much ba_data, get the count and batch the process if necessary
     feature_count = int(arcpy.management.GetCount(enrich_fc)[0])
-
     if feature_count > enrich_threshold:
 
         # create a list of individual query statements for each feature
@@ -68,71 +55,61 @@ def _enrich_wrapper(enrich_var_lst, feature_class_to_enrich, output_enriched_fea
         oid_fld = arcpy.Describe(enrich_fc).OIDFieldName
         query_lst = [f'{oid_fld} = {oid}' for oid in oid_list]
 
-        # break the list into chunks
-        query_chunk_count = math.ceil(feature_count / select_threshold)
-        oid_chunk_lst = [query_lst[idx * select_threshold: (idx + 1) * select_threshold]
-                         for idx in range(query_chunk_count)]
+        # break the list into chunks to select features in chunks up to the enrich threshold
+        oid_chunk_lst = blow_chunks(query_lst, enrich_threshold)
         query_chunk_lst = [' OR '.join(chunk) for chunk in oid_chunk_lst]
-
-        # create a layer to speed up the iterative process
-        enrich_lyr = arcpy.management.MakeFeatureLayer(enrich_fc)[0]
-
-        # calculate the number of selections it is going to take for each enrichment chunk
-        select_count_per_chunk = math.floor(enrich_threshold / select_threshold)
 
         # list to put all the chunk processed enrichment feature classes
         enriched_chunk_lst = []
 
-        # iteratively enrich subsets of the whole dataset
-        for enrich_idx in range(math.ceil(feature_count / enrich_threshold)):
+        logger.debug(f'Splitting the enrich task into {len(query_chunk_lst)} chunks.')
 
-            # iteratively select features up to the enrich threshold
-            for select_idx in range(select_count_per_chunk):
+        # iterate the query chunks and create the chunked analysis areas
+        for enrich_idx, query_chunk in enumerate(query_chunk_lst):
 
-                # ensure there are queries left
-                if len(query_chunk_lst):
+            logger.debug(f'Starting to enrich {enrich_idx+1}/{len(query_chunk_lst)}')
 
-                    # get a query
-                    query = query_chunk_lst.pop()
-
-                    # if the first query, make a new query
-                    if select_idx == 0:
-                        arcpy.management.SelectLayerByAttribute(enrich_lyr, selection_type='NEW_SELECTION',
-                                                                where_clause=query)
-
-                    # otherwise, add to the selection
-                    else:
-                        arcpy.management.SelectLayerByAttribute(enrich_lyr, selection_type='ADD_TO_SELECTION',
-                                                                where_clause=query)
-
-            # run enrichment for chunk
-            enrich_chunk_fc = arcpy.ba.EnrichLayer(
-                in_features=enrich_lyr,
-                out_feature_class=os.path.join(arcpy.env.scratchGDB, 'enrich_{:04d}'.format(enrich_idx)),
-                variables=enrich_string
+            # extract out a temporary dataset into memory for this loop
+            tmp_features = arcpy.analysis.Select(
+                in_features=feature_class_to_enrich,
+                out_feature_class=os.path.join(out_gdb, f'in_enrich_chunk_{enrich_idx:04d}'),
+                where_clause=query_chunk
             )[0]
 
-            # add the enriched chunk to the list
-            enriched_chunk_lst.append(enrich_chunk_fc)
+            # enrich just these features
+            enrich_fc = arcpy.ba.EnrichLayer(
+                in_features=tmp_features,
+                out_feature_class=os.path.join(out_gdb, f'tmp_enrich{enrich_idx:04d}'),
+                variables=enrich_var_lst
+            )[0]
 
-            # ensure features deselected
-            arcpy.management.SelectLayerByAttribute(enrich_lyr, selection_type='CLEAR_SELECTION')
+            # delete the temporary input ba_data
+            arcpy.management.Delete(tmp_features)
+
+            # add this iteration to the enriched chunks
+            enriched_chunk_lst.append(enrich_fc)
+
+            logger.debug(f'Finished enriching {enrich_idx + 1}/{len(query_chunk_lst)}')
 
         # combine all the chunked outputs together
         enrich_fc = arcpy.management.Merge(enriched_chunk_lst, output_enriched_feature_class)
 
+        # take out the trash
+        for fc in enriched_chunk_lst:
+            arcpy.management.Delete(fc)
+
     else:
-        # run enrichment
         enrich_fc = arcpy.ba.EnrichLayer(
             in_features=enrich_fc,
             out_feature_class=output_enriched_feature_class,
-            variables=enrich_string
+            variables=enrich_var_lst
         )[0]
 
     return enrich_fc
 
 
-def enrich_from_enriched(enrich_template_feature_class, feature_class_to_enrich, output_enriched_feature_class):
+def enrich_from_enriched(enrich_template_feature_class: str, feature_class_to_enrich: str,
+                         output_enriched_feature_class: str) -> str:
     """
     Enrich a new dataset using a previously enriched dataset as a template.
     :param enrich_template_feature_class: String path to a previously enriched feature class.
@@ -149,7 +126,7 @@ def enrich_from_enriched(enrich_template_feature_class, feature_class_to_enrich,
     return _enrich_wrapper(enrich_var_lst, feature_class_to_enrich, output_enriched_feature_class)
 
 
-def enriched_fields_to_csv(enrich_template_feature_class, output_csv_file):
+def enriched_fields_to_csv(enrich_template_feature_class: str, output_csv_file: str) -> str:
     """
     Save a dataframe for the variables from the enriched dataset to a dataframe.
     :param enrich_template_feature_class: String path to a previously enriched feature class.
@@ -165,7 +142,8 @@ def enriched_fields_to_csv(enrich_template_feature_class, output_csv_file):
     return output_csv_file
 
 
-def enrich_from_fields_table(enrich_table, feature_class_to_enrich, output_enriched_feature_class):
+def enrich_from_fields_table(enrich_table: str, feature_class_to_enrich: str,
+                             output_enriched_feature_class: str) -> str:
     """
     Enrich the input features using a saved enrichment table.
     :param enrich_table: Pandas Dataframe or string path to saved CSV file with same schema.
@@ -184,4 +162,16 @@ def enrich_from_fields_table(enrich_table, feature_class_to_enrich, output_enric
     # create the enrich string formatted for input into the Enrich tool
     enrich_var_lst = list(enrich_tbl['enrich_str'].values)
 
+    return _enrich_wrapper(enrich_var_lst, feature_class_to_enrich, output_enriched_feature_class)
+
+
+def enrich_all(feature_class_to_enrich: str, output_enriched_feature_class: str) -> str:
+    """
+    Enrich the input features with all available local variables.
+    :param feature_class_to_enrich: String path to feature class to be enriched.
+    :param output_enriched_feature_class: String path to location where the enriched feature class will be saved.
+    :return: String path to output enriched feature class.
+    """
+    enrich_tbl = ba_data.enrich_vars_dataframe
+    enrich_var_lst = list(enrich_tbl['enrich_str'].values)
     return _enrich_wrapper(enrich_var_lst, feature_class_to_enrich, output_enriched_feature_class)

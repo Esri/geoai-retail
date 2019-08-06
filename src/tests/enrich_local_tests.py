@@ -1,12 +1,22 @@
+import logging
 import os
 
 import arcpy
+import pytest
 
 from geoai_retail import enrich_local as enrich
 
 enrich_template_fc = './test_data.gdb/block_groups_enrich_template'
 block_groups_fc = './test_data.gdb/block_groups'
 blocks_fc = './test_data.gdb/blocks'
+
+
+@pytest.fixture
+def single_feature():
+    fc = block_groups_fc
+    first_oid = [val for val in arcpy.da.SearchCursor(fc, 'OID@')][0][0]
+    sql_str = f'{arcpy.Describe(fc).OIDFieldName} = {first_oid}'
+    return arcpy.analysis.Select(fc, 'memory/first_feature', sql_str)[0]
 
 
 def test_enrich_from_enriched():
@@ -40,8 +50,6 @@ def test_enriched_fields_to_csv():
     enrich_csv = enrich.enriched_fields_to_csv(enrich_template_fc,
                                                os.path.join(arcpy.env.scratchFolder, 'temp_test.csv'))
 
-    assert(os.path.exists(enrich_csv))
-
 
 def test_enrich_from_fields_table():
 
@@ -56,3 +64,9 @@ def test_enrich_from_fields_table():
     contains_lst = [f in out_fields for f in enrich_fields]
 
     assert(all(contains_lst))
+
+
+def test_enrich_all(single_feature):
+
+    enrich_out = enrich.enrich_all(single_feature, os.path.join(arcpy.env.scratchGDB, 'test_enrich_all'))
+    assert(arcpy.Exists(enrich_out))

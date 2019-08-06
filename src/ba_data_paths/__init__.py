@@ -1,1 +1,1 @@
-from ba_data_paths.data import data as ba_data
+from ba_data_paths.ba_data import ba_data as ba_data

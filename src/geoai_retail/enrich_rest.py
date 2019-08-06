@@ -33,7 +33,7 @@ def get_online_variable_list(variable_list_to_lookup, gis, exclude_five_year_pro
     :param variable_list_to_lookup: List of field/column names from an dataset already enriched.
     :param exclude_five_year_projections: Boolean to indicate if to consider the future year (five year projection) variables.
     """
-    # get the data available in the USA
+    # get the ba_data available in the USA
     usa = geoenrichment.Country.get('USA')
     enrich_df = usa.data_collections
 
@@ -49,7 +49,7 @@ def get_online_variable_list(variable_list_to_lookup, gis, exclude_five_year_pro
     # drop any variable name duplicates
     enrich_df = enrich_df.drop_duplicates('variable_name')
 
-    # flag variables we want to use for enriching the new data
+    # flag variables we want to use for enriching the new ba_data
     var_match = enrich_df['variable_name'].apply(lambda var_name: var_name in variable_list_to_lookup)
 
     # create a list of the analysis variables usable for enrichment
@@ -61,7 +61,7 @@ def get_enrichment_alias_dataframe(variable_list_to_lookup, gis):
     # make sure we have a GIS object
     assert isinstance(gis, GIS)
 
-    # get the data available in the USA
+    # get the ba_data available in the USA
     usa = geoenrichment.Country.get('USA')
     enrich_df = usa.data_collections
 
@@ -159,14 +159,14 @@ def _enrich_wrapper(geo_df, variable_lst, gis):
 
 
 def enrich(input_data, input_data_id_col, variable_list, gis):
-    # get the data into a dataframe
+    # get the ba_data into a dataframe
     geo_df = utils.get_dataframe(input_data)
 
     # get the limitations on the enrichment rest endpoint, and scale the analysis based on this
     enrich_limits = get_enrich_limits(gis)
     max_study_areas = enrich_limits.max_study_areas  # since the service so frequently has issues
 
-    # if necessary, batch the analysis based on the size of the input data, and the number of destinations per origin
+    # if necessary, batch the analysis based on the size of the input ba_data, and the number of destinations per origin
     if len(geo_df.index) > max_study_areas:
 
         # process each batch, and save the results to a temp file in the temp directory

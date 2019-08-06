@@ -17,8 +17,8 @@ sys.path.append('../src')
 app_id = 'c9fa4c15-b9ab-46d4-bcd9-a3eb33dd0ff8'
 hash_token = '919745fda981ddccb3ffc4f07863480e624cfa3d'
 
-raw_gdb = os.path.abspath(r'../data/raw/raw.gdb')
-int_gdb = os.path.abspath(r'../data/interim/interim.gdb')
+raw_gdb = os.path.abspath(r'../ba_data/raw/raw.gdb')
+int_gdb = os.path.abspath(r'../ba_data/interim/interim.gdb')
 
 dest_fc = os.path.join(int_gdb, 'pdx_businesses_home_goods')
 dest_id_fld = 'LOCNUM'

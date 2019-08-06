@@ -18,7 +18,7 @@ class CalculateMarketPenetration(BaseTransformer):
     def __init__(self, customer_count_field, total_population_field):
         """
         Calculate the market penetration based on a measured metric over a metric to standardize by. This commonly is a
-        measured customer count from human movement data plotting home locations. This customer count is then divided by
+        measured customer count from human movement ba_data plotting home locations. This customer count is then divided by
         a metric to standardize by, typically either total population or household count.
         :param customer_count_field: Field containing the customer count per feature.
         :param total_population_field: Field containing the total population against which the customer count will be
@@ -55,7 +55,7 @@ class DemographicFeatureClassToDataframe(BaseTransformer):
                                 columns=['name', 'alias'])
         alias_df.to_csv(self.alias_table)
 
-        # next, load up the data into a Spatially Enabled Dataframe
+        # next, load up the ba_data into a Spatially Enabled Dataframe
         bg_df = GeoAccessor.from_featureclass(X)
 
         # since these columns mostly just get in the way, get rid of them
@@ -120,7 +120,7 @@ class StoreClassifyByCount(BaseTransformer):
         store_count_df = X[['store_class', 'store_id']].groupby('store_class').count()
         store_count_df.columns = [count_column]
 
-        # join the store count to the original data
+        # join the store count to the original ba_data
         store_count_df = X.join(store_count_df, on='store_class')
 
         # substitute OTHER for all brands at or below the threshold
@@ -198,10 +198,10 @@ class AddStoresDataframeToTripsDataframe(BaseTransformer):
         # if the destination is numeric and the store index is a string
         elif not X['destination_id'].apply(type).eq(str).all() and not self.store_df.index.is_numeric():
 
-            # convert the index to the numeric data type of the join field
+            # convert the index to the numeric ba_data type of the join field
             self.store_df.index = self.store_df.index.astype(X['destination_id'].dtype)
 
-        # join the data frames together
+        # join the ba_data frames together
         join_df = X.join(self.store_df, on=self.dest_id_fld)
 
         # convert both the origin and destination columns to numeric to avoid issues later
@@ -226,7 +226,7 @@ class AddPolygonOriginDataframeToInrixTripSummaryDataframe(BaseTransformer):
         self.trip_origin_id_fld = trip_origin_id_field
 
     def transform(self, X, y=None):
-        # ensure the field to use for the join is of the right data type
+        # ensure the field to use for the join is of the right ba_data type
         X[self.trip_origin_id_fld] = X[self.trip_origin_id_fld].astype(self.origin_df.index.dtype)
 
         # join the datafames together
@@ -358,7 +358,7 @@ class CalculateOriginProximityMetricsByStoreClass(BaseTransformer):
         focus_origin_df = origin_df.groupby('store_class').head(3)
         focus_origin_df = focus_origin_df.sort_values('store_class')
 
-        # for every combination of store class (usually name) and the origin id, send this subset of data to get a
+        # for every combination of store class (usually name) and the origin id, send this subset of ba_data to get a
         # pivoted table of the nearest locations for every origin id
         for idx, (store_class) in enumerate(focus_origin_df['store_class'].unique()):
 
