@@ -2,6 +2,7 @@ import logging
 import os
 
 import arcpy
+import pandas as pd
 import pytest
 
 from geoai_retail import enrich_local as enrich
@@ -49,6 +50,15 @@ def test_enriched_fields_to_csv():
 
     enrich_csv = enrich.enriched_fields_to_csv(enrich_template_fc,
                                                os.path.join(arcpy.env.scratchFolder, 'temp_test.csv'))
+
+    enrich_fields = ['F5yearincrements_POP18UP_CY', 'F5yearincrements_MEDAGE_CY', 'F5yearincrements_MEDAGE10',
+                     'clothing_X5001_X', 'hispanicorigin_HISPPOP_CY', 'householdincome_MEDHINC_CY',
+                     'householdincome_PCI_CY', 'SpendingTotal_X1001_X', 'SpendingTotal_X15001_X']
+    enrich_df = pd.read_csv(enrich_csv)
+    out_fields = enrich_df.columns
+    contains_lst = [f in out_fields for f in enrich_fields]
+
+    assert (all(contains_lst))
 
 
 def test_enrich_from_fields_table():
