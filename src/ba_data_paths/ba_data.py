@@ -282,16 +282,9 @@ class BA_Data:
         # field list to populate with property tuples
         fld_lst = []
 
-        def _get_field_attrib(field_ele):
-            """Helper function to get field element properties out of xml files"""
-            if 'MapTo' in [itm[0] for itm in field_ele.attrib.items()]:
-                return field_ele.attrib['MapTo'], field_ele.attrib['Alias']
-            else:
-                return field_ele.attrib['Name'], field_ele.attrib['Alias']
-
         def _is_hidden(field_ele):
             """Helper to determine if hidden fields."""
-            if 'HideInDataBrowser' in field_ele.attrib and field_ele.attrib['HideInDataBrowser'] is True:
+            if 'HideInDataBrowser' in field_ele.attrib and field_ele.attrib['HideInDataBrowser'] == 'True':
                 return True
             else:
                 return False
@@ -299,7 +292,8 @@ class BA_Data:
         # collect any raw scalar fields
         uncalc_ele_fields = coll_root.find('./Calculators/Demographic/Fields')
         if uncalc_ele_fields:
-            fld_lst.append([_get_field_attrib(field_ele) for field_ele in uncalc_ele_fields.findall('Field')
+            fld_lst.append([(field_ele.attrib['Name'], field_ele.attrib['Alias'])
+                           for field_ele in uncalc_ele_fields.findall('Field')
                             if not _is_hidden(field_ele)])
 
         # collect any calculated field types
@@ -308,22 +302,27 @@ class BA_Data:
 
             # since there are two types of calcualted fields, account for this
             for field_type in ['PercentCalc', 'Script']:
-                single_fld_lst = [_get_field_attrib(field_ele) for field_ele in calc_ele_fields.findall(field_type)
+                single_fld_lst = [(field_ele.attrib['Name'], field_ele.attrib['Alias'])
+                                  for field_ele in calc_ele_fields.findall(field_type)
                                   if not _is_hidden(field_ele)]
                 fld_lst.append(single_fld_lst)
 
         # combine the results of both uncalculated and calculated fields located into single result
         field_lst = list(itertools.chain.from_iterable(fld_lst))
 
-        # create a dataframe with the field information
-        coll_df = pd.DataFrame(field_lst, columns=['name', 'alias'])
+        if len(field_lst):
+            # create a dataframe with the field information
+            coll_df = pd.DataFrame(field_lst, columns=['name', 'alias'])
 
-        # using the collected information, create the really valuable fields
-        coll_df['collection_name'] = coll_file.split('.')[0]
-        coll_df['enrich_str'] = coll_df.apply(lambda row: f"{row['collection_name']}.{row['name']}", axis='columns')
-        coll_df['enrich_field_name'] = coll_df['enrich_str'].apply(lambda val: self._get_out_field_name(val))
+            # using the collected information, create the really valuable fields
+            coll_df['collection_name'] = coll_file.split('.')[0]
+            coll_df['enrich_str'] = coll_df.apply(lambda row: f"{row['collection_name']}.{row['name']}", axis='columns')
+            coll_df['enrich_field_name'] = coll_df['enrich_str'].apply(lambda val: self._get_out_field_name(val))
 
-        return coll_df
+            return coll_df
+
+        else:
+            return None
 
     def get_enrich_vars_dataframe(self, drop_duplicates:bool=True) -> pd.DataFrame:
         collection_dir = self._get_data_collection_dir()
@@ -332,12 +331,16 @@ class BA_Data:
         coll_xml_lst = [coll_file for coll_file in os.listdir(collection_dir) if coll_file != 'EnrichmentPacksList.xml']
 
         # get the necessary properties from the collection xml files
-        coll_df = pd.concat([self._get_coll_df(coll_file) for coll_file in coll_xml_lst])
+        coll_df_lst = [self._get_coll_df(coll_file) for coll_file in coll_xml_lst]
+        coll_df = pd.concat([df for df in coll_df_lst if df is not None])
 
         if drop_duplicates:
             coll_df.drop_duplicates('name', inplace=True)
 
         coll_df.sort_values('enrich_str')
+
+        coll_df.reset_index(drop=True, inplace=True)
+
         return coll_df
 
     @property
