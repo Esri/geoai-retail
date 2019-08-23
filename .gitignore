@@ -93,3 +93,7 @@ models/
 
 # logfiles
 **/*.log
+
+**/*.pyHistory
+
+**/*.lock
