@@ -2,6 +2,7 @@
 Methods to analyze hypotehtical scenarios.
 """
 
+import arcgis
 from arcgis.geometry import Point
 import pandas as pd
 
@@ -26,7 +27,8 @@ def _get_min_uid(df, uid_field, start_value=None):
 
 def get_add_new_closest_dataframe(origins:[str, pd.DataFrame], origin_id_field:str, destinations:[str, pd.DataFrame],
                                   destination_id_field:str,  closest_table:[str, pd.DataFrame], new_destination:Point,
-                                  origin_weighting_points:[str, pd.DataFrame]=None) -> pd.DataFrame:
+                                  gis:arcgis.gis.GIS=None, origin_weighting_points:[str, pd.DataFrame]=None
+                                  ) -> pd.DataFrame:
     """
     Calculate the impact of a location being added to the retail landscape.
     :param origins: Polygons in a Spatially Enabled Dataframe or string path to Feature Class delineating starting
@@ -62,10 +64,19 @@ def get_add_new_closest_dataframe(origins:[str, pd.DataFrame], origin_id_field:s
     new_df = pd.DataFrame([[new_id, new_id, new_destination]], columns=['ID', 'Name', 'SHAPE'])
     new_df.spatial.set_geometry('SHAPE')
 
-    # get the nth closest destination locations to the new destination location
-    closest_dest_df = proximity.get_closest_solution(new_df, 'ID', dest_df, 'ID',
-                                                     network_dataset=ba_data.usa_network_dataset,
-                                                     destination_count=dest_count)
+    # if a GIS is provided, use online resources
+    if gis is not None:
+        # get the nth closest destination locations to the new destination location
+        closest_dest_df = proximity.get_closest_solution(new_df, 'ID', dest_df, 'ID', gis=gis,
+                                                         destination_count=dest_count)
+
+    # otherwise, use local solver
+    else:
+
+        # get the nth closest destination locations to the new destination location
+        closest_dest_df = proximity.get_closest_solution(new_df, 'ID', dest_df, 'ID',
+                                                         network_dataset=ba_data.usa_network_dataset,
+                                                         destination_count=dest_count)
 
     # get the destination ids of the existing nth closest destinations
     dest_subset_ids = closest_dest_df['destination_id'].values
@@ -82,11 +93,24 @@ def get_add_new_closest_dataframe(origins:[str, pd.DataFrame], origin_id_field:s
     dest_analysis_df.spatial.set_geometry('SHAPE')
     dest_analysis_df.reset_index(inplace=True, drop=True)
 
-    # solve for the closest destination to the affected area
-    closest_subset_df = proximity.closest_dataframe_from_origins_destinations(subset_origin_df, 'ID', dest_analysis_df,
-                                                                              'ID',
-                                                                              network_dataset=ba_data.usa_network_dataset,
-                                                                              destination_count=dest_count)
+    # if a GIS is provided, use online resources to solve for the closest destination to the affected area
+    if gis is not None:
+
+        # solve for the closest destination to the affected area
+        closest_subset_df = proximity.closest_dataframe_from_origins_destinations(subset_origin_df, 'ID',
+                                                                                  dest_analysis_df, 'ID',
+                                                                                  gis=gis,
+                                                                                  destination_count=dest_count)
+
+    # otherwise, use local resources
+    else:
+
+        # solve for the closest destination to the affected area
+        closest_subset_df = proximity.closest_dataframe_from_origins_destinations(subset_origin_df, 'ID',
+                                                                                  dest_analysis_df, 'ID',
+                                                                                  network_dataset=ba_data.usa_network_dataset,
+                                                                                  destination_count=dest_count)
+
     return closest_subset_df
 
 

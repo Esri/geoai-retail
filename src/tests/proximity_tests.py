@@ -5,9 +5,13 @@ import pandas as pd
 
 import arcpy
 import pytest
-from arcgis import GeoAccessor
+from arcgis.features import GeoAccessor
+from arcgis.gis import GIS
 
 import geoai_retail.proximity_local as proximity
+
+sys.path.append('../../notebooks')
+import config
 
 network_dataset = r'D:\arcgis\ba_data\Data\Streets Data\NorthAmerica.gdb\Routing\Routing_ND'
 
@@ -33,6 +37,9 @@ def origin_df():
 def study_origin(origin_df):
     return origin_df[origin_df['ID'] == '410670310043']
 
+@pytest.fixture
+def ent_gis():
+    return GIS(config.ent_url, username=config.ent_user, password=config.ent_pass)
 
 @pytest.fixture
 def weighting_points():
@@ -66,3 +73,15 @@ def test_closest_dataframe_from_origins_destinations(origin_df, dest_df):
                                                                        destination_count=destination_count)
 
     assert (isinstance(closest_df, pd.DataFrame))
+
+
+def test_get_closest_df_rest(origin_df, dest_df, ent_gis):
+
+    destination_count = 4
+
+    origin_df = proximity.prep_sdf_for_nearest(origin_df, 'ID')
+    dest_df = proximity.prep_sdf_for_nearest(dest_df, 'LOCNUM')
+
+    closest_df = proximity._get_closest_df_rest(origin_df, dest_df, dest_count=destination_count, gis=ent_gis)
+
+    assert(isinstance(closest_df, pd.DataFrame))

@@ -1,0 +1,5 @@
+requests
+numpy
+pandas
+arcgis>=1.6.1
+

@@ -4,13 +4,13 @@ Purpose:        Geoenrichment is notoriously a gigantic pain to reproduce. This 
 Author:         Joel McCune (https://github.com/knu2xs)
 DOB:            05 Jun 2019
 """
-
-import pandas as pd
-import arcpy
-from arcgis.gis import GIS
-from arcgis.geoenrichment import Country
 import math
 import os
+
+from arcgis.gis import GIS
+from arcgis.geoenrichment import Country
+import arcpy
+import pandas as pd
 
 # column ID list, it only needs to be populated once, so located here
 col_id_lst = None

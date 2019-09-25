@@ -1,6 +1,5 @@
 import logging
 import os
-import uuid
 
 import arcpy
 

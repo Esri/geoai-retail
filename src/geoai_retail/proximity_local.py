@@ -3,6 +3,7 @@ import os
 import tempfile
 import uuid
 
+from arcgis.network.analysis import find_closest_facilities
 from arcgis.features import GeoAccessor
 from arcgis.geometry import Geometry
 import arcpy
@@ -20,8 +21,10 @@ arcpy.env.overwriteOutput = True
 
 def weighted_polygon_centroid(poly_df, wgt_df, poly_id_fld='ID'):
     # create a spatial index for both spatially enabled dataframes to speed up the join
-    poly_df.spatial.sindex()
-    wgt_df.spatial.sindex()
+    if poly_df.spatial._sindex is None:
+        poly_df.spatial.sindex()
+    if wgt_df.spatial._sindex is None:
+        wgt_df.spatial.sindex()
 
     # perform a spatial join between the points and the containing polygons
     join_df = wgt_df.spatial.join(poly_df)
@@ -128,6 +131,39 @@ def _get_max_near_dist_arcpy(origin_lyr):
     return max_near_dist
 
 
+def _get_closest_df_rest(origin_df, dest_df, dest_count, gis, max_dist=None):
+    """
+    Succinct function wrapping find_closest_facilities with a little ability to handle network and server hiccups
+    :param origin_df: Origin points Spatially Enabled Dataframe
+    :param dest_df: Destination points Spatially Enabled Dataframe
+    :param dest_count: Destination points Spatially Enabled Dataframe
+    :param gis: ArcGIS Web GIS object instance with networking configured.
+    :param max_dist: Maximum nearest routing distance in miles.
+    :return: Spatially Enabled Dataframe of solved closest facility routes.
+    """
+    attempt_count = 0
+    max_attempts = 10
+    while attempt_count < max_attempts:
+        try:
+            closest_result = find_closest_facilities(
+                incidents=origin_df.spatial.to_featureset().to_json,
+                facilities=dest_df.spatial.to_featureset().to_json,
+                measurement_units='Miles',
+                number_of_facilities_to_find=dest_count,
+                cutoff=max_dist,
+                travel_direction='Incident to Facility',
+                use_hierarchy=False,
+                restrictions="['Avoid Private Roads', 'Driving an Automobile', 'Roads Under Construction Prohibited', "
+                             "'Avoid Gates', 'Avoid Express Lanes', 'Avoid Carpool Roads']",
+                impedance='Travel Distance',
+                gis=gis
+            )
+            return closest_result.output_routes.sdf
+
+        except:
+            attempt_count = attempt_count + 1
+
+
 def _get_closest_df_arcpy(origin_df, dest_df, dest_count, network_dataset, max_dist=None):
     """
     Succinct function wrapping find_closest_facilities with a little ability to handle network and server hiccups
@@ -138,16 +174,23 @@ def _get_closest_df_arcpy(origin_df, dest_df, dest_count, network_dataset, max_d
     :param max_dist: Maximum nearest routing distance in miles.
     :return: Spatially Enabled Dataframe of solved closest facility routes.
     """
-    # set the workspace so networking has a place to save results
+    # set the workspace so networking has a place to save results, and also clean out results of previous runs
     temp_dir = tempfile.gettempdir()
     temp_gdb = os.path.join(temp_dir, 'temp.gdb')
     if not arcpy.Exists(temp_gdb):
         arcpy.management.CreateFileGDB(temp_dir, 'temp.gdb')
+    else:
+        for top, dir_lst, obj_lst in arcpy.da.Walk(temp_gdb):
+            for obj in obj_lst:
+                arcpy.management.Delete(os.path.join(top, obj))
+            for dir_obj in dir_lst:
+                arcpy.management.Delete(os.path.join(top, dir_obj))
+            break
     arcpy.env.workspace = temp_gdb
 
     # save the spatially enabled dataframes as feature classes for routing analysis
-    origin_fc = origin_df.spatial.to_featureclass(os.path.join(temp_gdb, f'origin_fc_{uuid.uuid4().hex}'))
-    dest_fc = dest_df.spatial.to_featureclass(os.path.join(temp_gdb, f'dest_fc_{uuid.uuid4().hex}'))
+    origin_fc = origin_df.reset_index(drop=True).spatial.to_featureclass(os.path.join(temp_gdb, f'origin_fc_{uuid.uuid4().hex}'))
+    dest_fc = dest_df.reset_index(drop=True).spatial.to_featureclass(os.path.join(temp_gdb, f'dest_fc_{uuid.uuid4().hex}'))
 
     # convert to a layer
     origin_lyr = arcpy.management.MakeFeatureLayer(origin_fc)[0]
@@ -222,7 +265,8 @@ def _get_closest_df_arcpy(origin_df, dest_df, dest_count, network_dataset, max_d
     arcpy.na.Solve(na_lyr)
 
     # convert the routes to a spatially enabled dataframe to send back
-    closest_fc = arcpy.Describe(na_lyr_dict['CFRoutes']).catalogPath
+    routes_lyr_name = [lyr for lyr in na_lyr_dict.keys() if 'Routes' in lyr][0]
+    closest_fc = arcpy.Describe(na_lyr_dict[routes_lyr_name]).catalogPath
     closest_df = GeoAccessor.from_featureclass(closest_fc)
 
     # get rid of the extra empty columns the local network solve adds
@@ -247,7 +291,7 @@ def _get_closest_csv(origin_df, dest_df, dest_count, gis, max_dist=None):
     :return: String path to CSV of solved closest facility routes.
     """
     out_csv_path = f'{temp_file_root}_{uuid.uuid4().hex}.csv'
-    closest_df = _get_closest_df_arcpy(origin_df, dest_df, dest_count, gis, max_dist)
+    closest_df = _get_closest_df_rest(origin_df, dest_df, dest_count, gis, max_dist)
     closest_df.to_csv(out_csv_path)
     return out_csv_path
 
@@ -359,29 +403,28 @@ def get_closest_solution(origins, origin_id_fld, destinations, dest_id_fld, gis=
 
     if gis is not None:
 
-        raise Exception('Using remote network routing is not yet implemented.')
+        # raise NotImplementedError('Using remote network routing is not yet implemented.')
 
-        # # get the limitations on the networking rest endpoint, and scale the analysis based on this
-        # max_records = gis._con.get(gis.properties.helperServices.asyncClosestFacility.url.rpartition('/')[0])[
-        #     'maximumRecords']
-        # max_origin_cnt = math.floor(max_records / destination_count)
-        #
-        # # if necessary, batch the analysis based on the size of the input ba_data, and the number of destinations per origin
-        # if len(origin_df.index) > max_origin_cnt:
-        #
-        #     # process each batch, and save the results to a temp file in the temp directory
-        #     closest_csv_list = [_get_closest_csv(origin_df.iloc[idx:idx + max_origin_cnt], dest_df, destination_count, gis)
-        #                         for idx in range(0, len(origin_df.index), max_origin_cnt)]
-        #
-        #     # load all the temporary files into dataframes and combine them into a single dataframe
-        #     closest_df = pd.concat([pd.read_csv(closest_csv) for closest_csv in closest_csv_list])
-        #
-        #     # clean up the temp files
-        #     for csv_file in closest_csv_list:
-        #         os.remove(csv_file)
-        #
-        # else:
-        #     closest_df = _get_closest_df(origin_df, dest_df, destination_count, gis)
+        # get the limitations on the networking rest endpoint, and scale the analysis based on this
+        max_records = gis._con.get(gis.properties.helperServices.asyncClosestFacility.url.rpartition('/')[0])['maximumRecords']
+        max_origin_cnt = math.floor(max_records / destination_count)
+
+        # if necessary, batch the analysis based on the size of the input ba_data, and the number of destinations per origin
+        if len(origin_df.index) > max_origin_cnt:
+
+            # process each batch, and save the results to a temp file in the temp directory
+            closest_csv_list = [_get_closest_csv(origin_df.iloc[idx:idx + max_origin_cnt], dest_df, destination_count, gis)
+                                for idx in range(0, len(origin_df.index), max_origin_cnt)]
+
+            # load all the temporary files into dataframes and combine them into a single dataframe
+            closest_df = pd.concat([pd.read_csv(closest_csv) for closest_csv in closest_csv_list])
+
+            # clean up the temp files
+            for csv_file in closest_csv_list:
+                os.remove(csv_file)
+
+        else:
+            closest_df = _get_closest_df_rest(origin_df, dest_df, destination_count, gis)
 
     elif network_dataset is not None:
 

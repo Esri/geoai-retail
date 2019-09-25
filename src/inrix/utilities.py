@@ -63,7 +63,7 @@ class TAZ(object):
         )
 
         if resp.status_code == 200:
-            json_data = resp.json()['ba_data']
+            json_data = resp.json()['data']
             df = pd.DataFrame(json_data)
         else:
             raise Exception('Request error: {}'.format(resp.json()['description']))
