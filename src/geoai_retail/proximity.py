@@ -179,13 +179,6 @@ def _get_closest_df_arcpy(origin_df, dest_df, dest_count, network_dataset, max_d
     temp_gdb = os.path.join(temp_dir, 'temp.gdb')
     if not arcpy.Exists(temp_gdb):
         arcpy.management.CreateFileGDB(temp_dir, 'temp.gdb')
-    else:
-        for top, dir_lst, obj_lst in arcpy.da.Walk(temp_gdb):
-            for obj in obj_lst:
-                arcpy.management.Delete(os.path.join(top, obj))
-            for dir_obj in dir_lst:
-                arcpy.management.Delete(os.path.join(top, dir_obj))
-            break
     arcpy.env.workspace = temp_gdb
 
     # save the spatially enabled dataframes as feature classes for routing analysis

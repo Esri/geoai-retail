@@ -7,7 +7,7 @@ from arcgis.geometry import Point
 import pandas as pd
 
 from ba_data_paths import ba_data
-from geoai_retail import proximity_local as proximity
+from geoai_retail import proximity
 from geoai_retail.utils import get_dataframe
 
 

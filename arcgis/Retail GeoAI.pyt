@@ -8,7 +8,7 @@ dir_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 src_dir = os.path.join(dir_path, 'src')
 sys.path.append(src_dir)
 
-from geoai_retail import enrich
+from geoai_retail.archive_stash import enrich
 
 
 class Toolbox(object):
