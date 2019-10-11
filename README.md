@@ -33,3 +33,15 @@ GeoAI Retail is structured to work with data in a directory _not_ contained in t
 This convention is to create a `data` directory in the root of this directory, along with `external`, `interim`, `processed`, `raw` and `test` directories within the `data` directory. Within these directories, put an Esri File Geodatabase with the same name as is needed. The scripts I am running are primarily using `raw.gdb` and `interim.gdb`. 
 
 Ideally, all of your source starting data consisting of origin geographies (typically block groups), brand stores, and competition locations is located in the `raw.gdb`. Further, the paths to these feature classes are saved as variables in `./scripts/data_sources.py` to be used when building the datasets to be used for model creation using `./scripts/make_data.py`.
+
+# License - [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+
+Copyright 2019 Esri
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
+
+You may obtain a copy of the License at [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+
+See the License for the specific language governing permissions and limitations under the License.
