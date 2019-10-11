@@ -32,4 +32,4 @@ GeoAI Retail is structured to work with data in a directory _not_ contained in t
 
 This convention is to create a `data` directory in the root of this directory, along with `external`, `interim`, `processed`, `raw` and `test` directories within the `data` directory. Within these directories, put an Esri File Geodatabase with the same name as is needed. The scripts I am running are primarily using `raw.gdb` and `interim.gdb`. 
 
-Ideally, all of your source starting data consisting of origin geographies (typically block groups), brand stores, and competition locations is located in the `raw.gdb`. Further, the paths to these feature classes are saved as variables in `./scripts/config.py` to be used when building the datasets to be used for model creation using `./scripts/make_data.py`.
+Ideally, all of your source starting data consisting of origin geographies (typically block groups), brand stores, and competition locations is located in the `raw.gdb`. Further, the paths to these feature classes are saved as variables in `./scripts/data_sources.py` to be used when building the datasets to be used for model creation using `./scripts/make_data.py`.
