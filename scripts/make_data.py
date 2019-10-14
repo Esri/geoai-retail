@@ -2,9 +2,9 @@ import os
 from pathlib import Path
 
 from ba_data_paths import ba_data
-from geoai_retail.enrich import enrich_all
-from geoai_retail.utils import get_logger
-from geoai_retail.proximity import closest_dataframe_from_origins_destinations
+from enrich import enrich_all
+from utils import get_logger
+from proximity import closest_dataframe_from_origins_destinations
 from scripts.data_sources import origin_customer_areas, origin_customer_area_id_field, destination_store_locations, \
     destination_store_id_field, destination_competition_locations, destination_competition_id_field
 
