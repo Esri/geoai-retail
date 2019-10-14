@@ -5,7 +5,7 @@ import arcpy
 import pandas as pd
 
 from ba_data_paths import ba_data
-from geoai_retail.utils import get_logger, blow_chunks
+from utils import get_logger, blow_chunks
 
 # get a logger to track issues
 logger = get_logger('DEBUG', './enrich_local.log')

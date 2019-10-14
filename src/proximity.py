@@ -9,7 +9,7 @@ from arcgis.geometry import Geometry
 import arcpy
 import pandas as pd
 
-import geoai_retail.utils as utils
+import utils as utils
 
 # location to store temp files if necessary
 csv_file_prefix = 'temp_closest'

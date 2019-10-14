@@ -7,8 +7,8 @@ from arcgis.geometry import Point
 import pandas as pd
 
 from ba_data_paths import ba_data
-from geoai_retail import proximity
-from geoai_retail.utils import get_dataframe
+import proximity
+from utils import get_dataframe
 
 
 def _get_min_uid(df, uid_field, start_value=None):

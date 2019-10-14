@@ -3,7 +3,7 @@ import os
 
 import arcpy
 
-from geoai_retail import enrich_local as enrich
+from src import enrich_local as enrich
 from ba_data_paths import ba_data
 
 enrich_template_fc = './test_data.gdb/block_groups_enrich_template'

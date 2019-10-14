@@ -1,4 +1,4 @@
-from geoai_retail import utils as utils
+import utils as utils
 from arcgis.gis import GIS
 
 

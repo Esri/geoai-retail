@@ -1,11 +1,10 @@
-import logging
 import os
 
 import arcpy
 import pandas as pd
 import pytest
 
-from geoai_retail import enrich_local as enrich
+from src import enrich_local as enrich
 
 enrich_template_fc = './test_data.gdb/block_groups_enrich_template'
 block_groups_fc = './test_data.gdb/block_groups'

@@ -1,6 +1,4 @@
-import os
 import sys
-import tempfile
 import pandas as pd
 
 import arcpy
@@ -8,7 +6,7 @@ import pytest
 from arcgis.features import GeoAccessor
 from arcgis.gis import GIS
 
-import geoai_retail.proximity_local as proximity
+import src.proximity_local as proximity
 
 sys.path.append('../../notebooks')
 import config
