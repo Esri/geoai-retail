@@ -7,7 +7,7 @@ with open('requirements.txt') as reqs:
     requirements = reqs.read().splitlines()
 
 setuptools.setup(
-    name='ba_data_paths',
+    name='geoai_retail',
     version='0.6',
     author='Joel McCune',
     author_email='jmccune@esri.com',
