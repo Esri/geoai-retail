@@ -13,12 +13,12 @@ logger = get_logger('DEBUG', '../data/interim/make_data.log')
 logger.__name__ = 'make_data'
 
 # ensure the directory tree exists to put the data
-interim_dir = Path(os.path.abspath('../data/interim'))
-interim_dir.mkdir(parents=True, exist_ok=True)
+temp_dir = Path(os.path.abspath('../data/interim'))
+temp_dir.mkdir(parents=True, exist_ok=True)
 
-enrich_all_out = interim_dir/'origin_enrich_all.csv'
-closest_store_out = interim_dir/'closest_store.csv'
-closest_competition_out = interim_dir/'closest_competition.csv'
+enrich_all_out = temp_dir / 'origin_enrich_all.csv'
+closest_store_out = temp_dir / 'closest_store.csv'
+closest_competition_out = temp_dir / 'closest_competition.csv'
 
 # enrich all contributing origin geographies with all available demographics
 if not enrich_all_out.exists():
@@ -61,6 +61,7 @@ if not closest_competition_out.exists():
             destination_competition_id_field, network_dataset=ba_data.usa_network_dataset, destination_count=6
         )
         nearest_df.columns = [c.replace('proximity', 'proximity_competition') for c in nearest_df.columns]
+        nearest_df.columns = [c.replace('destination', 'destination_competition') for c in nearest_df.columns]
         nearest_df.to_csv(str(closest_competition_out))
         logger.info('Successfully solved closest competition locations.')
 
