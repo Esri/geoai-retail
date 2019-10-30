@@ -1,6 +1,0 @@
-requests
-numpy
-pandas
-arcgis>=1.6.1
-ba_data_paths>=0.6
-scikit-learn
