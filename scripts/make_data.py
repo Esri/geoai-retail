@@ -1,72 +1,27 @@
-import os
+import os.path
 from pathlib import Path
 
-from ba_data_paths import ba_data
-from enrich import enrich_all
-from utils import get_logger
-from proximity import closest_dataframe_from_origins_destinations
-from scripts.data_sources import origin_customer_areas, origin_customer_area_id_field, destination_store_locations, \
-    destination_store_id_field, destination_competition_locations, destination_competition_id_field
+from ba_tools.analysis import get_master_csv
 
-# create a logger to save into the same directory
-logger = get_logger('DEBUG', '../data/interim/make_data.log')
-logger.__name__ = 'make_data'
+# this creates some path objects to make working with default data locations easier
+data_dir = Path(os.path.abspath('../data'))
+int_dir = data_dir/'interim'
+raw_dir = data_dir/'raw'
+raw_gdb = raw_dir/'raw.gdb'
 
-# ensure the directory tree exists to put the data
-temp_dir = Path(os.path.abspath('../data/interim'))
-temp_dir.mkdir(parents=True, exist_ok=True)
+# set the variables in this section
+origin_geography_layer = str(raw_gdb/'sea_block_group')
+origin_id_field = 'ID'
 
-enrich_all_out = temp_dir / 'origin_enrich_all.csv'
-closest_store_out = temp_dir / 'closest_store.csv'
-closest_competition_out = temp_dir / 'closest_competition.csv'
+brand_location_layer = str(raw_gdb/'sea_ace')
+brand_id_field = 'LOCNUM'
 
-# enrich all contributing origin geographies with all available demographics
-if not enrich_all_out.exists():
-    try:
-        logger.info(f'Starting to enrich {origin_customer_areas}.')
-        enrich_df = enrich_all(origin_customer_areas, id_field=origin_customer_area_id_field)
-        enrich_df.columns = ['origin_id' if c == origin_customer_area_id_field else c for c in enrich_df.columns]
-        enrich_df.to_csv(str(enrich_all_out))
-        logger.info(f'Successfully enriched origin geographies. The output is located at {str(enrich_all_out)}.')
+competitor_location_layer = str(raw_gdb/'sea_ace_comp')
+competitor_id_field = 'LOCNUM'
 
-    except Exception as e:
-        logger.error(f'Failed to enrich {origin_customer_areas}.\n{e}')
+output_csv_file = int_dir/'master_data.csv'
 
-else:
-    logger.info(f'Enriched origin geographies already exist at {str(enrich_all_out)}.')
-
-# create a nearest table for all store locations
-if not closest_store_out.exists():
-    try:
-        logger.info('Starting to find closest store locations.')
-        nearest_df = closest_dataframe_from_origins_destinations(
-            origin_customer_areas, origin_customer_area_id_field, destination_store_locations,
-            destination_store_id_field, network_dataset=ba_data.usa_network_dataset, destination_count=6
-        )
-        nearest_df.to_csv(str(closest_store_out))
-        logger.info('Successfully solved closest store locations.')
-
-    except Exception as e:
-        logger.error(f'Failed to solve closest stores.\n{e}')
-
-else:
-    logger.info(f'Closest store solution already exists at {str(closest_store_out)}.')
-
-# create a nearest table for all competition locations
-if not closest_competition_out.exists():
-    try:
-        logger.info('Starting to find closest competition locations')
-        nearest_df = closest_dataframe_from_origins_destinations(
-            origin_customer_areas, origin_customer_area_id_field, destination_competition_locations,
-            destination_competition_id_field, network_dataset=ba_data.usa_network_dataset, destination_count=6
-        )
-        nearest_df.columns = [c.replace('proximity', 'proximity_competition') for c in nearest_df.columns]
-        nearest_df.columns = [c.replace('destination', 'destination_competition') for c in nearest_df.columns]
-        nearest_df.to_csv(str(closest_competition_out))
-        logger.info('Successfully solved closest competition locations.')
-
-    except Exception as e:
-        logger.error(f'Failed to solve closest competition.\n{e}')
-
-else:
-    logger.info(f'Closest competition solution already exists at {str(closest_competition_out)}')
+# this is where the work gets done
+get_master_csv(origin_geography_layer, origin_id_field, brand_location_layer, brand_id_field, 
+               competitor_location_layer, competitor_id_field, output_csv_file, destination_count=6, 
+               overwrite_intermediate=False, logger=None)
