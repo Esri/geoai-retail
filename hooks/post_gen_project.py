@@ -36,10 +36,12 @@ if has_arcpy:
     # now create a reference to the new project
     new_aprx = arcpy.mp.ArcGISProject(new_project_path)
 
-    # create the file geodatabase
+    # create the file geodatabases
     interim_gdb = os.path.join(dir_lst[2], 'interim.gdb')
-    if not arcpy.Exists(interim_gdb):
-        arcpy.management.CreateFileGDB(dir_lst[2], 'interim.gdb')
+    raw_gdb = os.path.join(dir_lst[0], 'raw.gdb')
+    for gdb in [interim_gdb, raw_gdb]:
+        if not arcpy.Exists(gdb):
+            arcpy.management.CreateFileGDB(os.path.dirname(gdb), os.path.basename(gdb))
 
     # set the default file geodatabase for the aprx
     new_aprx.defaultGeodatabase = interim_gdb
