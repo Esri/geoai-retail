@@ -15,6 +15,7 @@ except AttributeError:
         has_arcpy = True
     else:
         has_arcpy = False
+
 # ensure the data directories are populated
 dir_lst = [os.path.join(os.getcwd(), 'data', drctry)
            for drctry in ['raw', 'external', 'interim', 'processed']]
