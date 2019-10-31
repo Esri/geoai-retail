@@ -1,31 +1,9 @@
-# Cookiecutter GeoAI
+# {{cookiecutter.project_name}}
 
-_A logical, reasonably standardized, but flexible project structure for doing and sharing GeoAI retail, geographic artificial intelligence retail analysis work._
+{{cookiecutter.description}}
 
-This cookiecutter template is designed to be used for GeoAI, geographic data science work utilizing ArcGIS Pro combined with Python machine learning technologies.
-
-### Requirements to use the cookiecutter template:
------------
- - ArcGIS Pro 3.4+ with the Business Analyst extension _and_ the Business Analyst data pack for the United States
- - Python 3.5+ with ArcPy (this is fulfilled by ArcGIS Pro)
- - [Cookiecutter](http://cookiecutter.readthedocs.org/en/latest/installation.html) >= 1.4.0: This can be installed with Conda:
-
-``` cmd
-> conda install -c conda-forge cookiecutter
-```
-
-
-### To start a new project, run:
+## Project Organization
 ------------
-
-``` cmd
-> cookiecutter https://github.com/knu2xs/geoai-retail
-```
-
-### The resulting directory structure
-------------
-
-The directory structure of your new project will look like this: 
 
 ```
     ├── LICENSE
@@ -33,7 +11,8 @@ The directory structure of your new project will look like this:
     ├── README.md          <- The top-level README for developers using this project.
     │
     ├── arcgis             <- Root location for ArcGIS Pro project created as part of
-    │                         data science project creation.
+    │                         data science project creation. This will not be here if
+    │                         you do not have `arcpy` available.
     │
     ├── scripts            <- Put scripts to run things here.
     |   │
@@ -43,18 +22,19 @@ The directory structure of your new project will look like this:
     ├── data
     │   ├── external       <- Data from third party sources.
     │   ├── interim        <- Intermediate data that has been transformed.
-    |   │   └── interim.gdb<- Intermediate ArcGIS data that has been transformed.
+    |   │   └── interim.gdb<- Intermediate ArcGIS data that has been transformed. This is
+    |   │                     only generated if `arcpy` is available.
     |   │
     │   ├── processed      <- The final, canonical data sets for modeling.
     │   └── raw            <- The original, immutable data dump.
-    |       └── raw.gdb    <- Original, immutable data in ArcGIS formats - typically feature
+    |       └── raw.gdb    <- Raw original, immutable data in ArcGIS formats, typically feature
     |                         classes. 
     │
     ├── docs               <- A default Sphinx project; see sphinx-doc.org for details
     │
-    ├── models             <- Trained and serialized models, model predictions, or model summaries.          
+    ├── models             <- Trained and serialized models, model predictions, or model summaries
+    |   │                     
     │   └── data_processing_tempate.ipynb
-    │
     ├── notebooks          <- Jupyter notebooks. Naming convention is a 2 digits (for ordering),
     │                         descriptive name. e.g.: 01_exploratory_analysis.ipynb
     │
@@ -64,3 +44,5 @@ The directory structure of your new project will look like this:
     │   └── figures        <- Generated graphics and figures to be used in reporting
     └── {{ cookiecutter.support_library }} <- Source code for use in this project.
 ```
+
+<p><small>Project based on the <a target="_blank" href="https://github.com/knu2xs/cookiecutter-geoai">cookiecutter GeoAI project template</a>. This template, in turn, is simply an extension and light modification of the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
