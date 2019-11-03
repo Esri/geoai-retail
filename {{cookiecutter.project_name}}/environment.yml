@@ -1,0 +1,17 @@
+name: {{cookiecutter.conda_environment_name}}
+channels:
+  - knu2xs
+  - esri
+  - conda-forge
+  - defaults
+dependencies:
+  - arcgis>=1.7
+  - ba-tools
+  - fastparquet
+  - pillow
+  - pyarrow
+  - pytest
+  - python-dotenv
+  - scikit-learn
+  - shapely
+  - snappy
