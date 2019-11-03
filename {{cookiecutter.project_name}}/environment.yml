@@ -8,6 +8,7 @@ dependencies:
   - arcgis>=1.7
   - ba-tools
   - fastparquet
+  - nodejs
   - pillow
   - pyarrow
   - pytest
