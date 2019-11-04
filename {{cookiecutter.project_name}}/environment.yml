@@ -5,7 +5,7 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - arcgis>=1.7
+  - arcgis>=1.7.0
   - ba-tools
   - fastparquet
   - nodejs
