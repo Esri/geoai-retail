@@ -9,10 +9,11 @@
     ├── LICENSE
     ├── .env               <- Any environment variables here.
     ├── README.md          <- The top-level README for developers using this project.
+    ├── environment.yml    <- Conda environment file.
+    ├── create_env.cmd     <- Conda environment creation script.   
     │
     ├── arcgis             <- Root location for ArcGIS Pro project created as part of
-    │                         data science project creation. This will not be here if
-    │                         you do not have `arcpy` available.
+    │                         data science project creation.
     │
     ├── scripts            <- Put scripts to run things here.
     |   │
@@ -22,19 +23,18 @@
     ├── data
     │   ├── external       <- Data from third party sources.
     │   ├── interim        <- Intermediate data that has been transformed.
-    |   │   └── interim.gdb<- Intermediate ArcGIS data that has been transformed. This is
-    |   │                     only generated if `arcpy` is available.
+    |   │   └── interim.gdb<- Intermediate ArcGIS data that has been transformed.
     |   │
     │   ├── processed      <- The final, canonical data sets for modeling.
     │   └── raw            <- The original, immutable data dump.
-    |       └── raw.gdb    <- Raw original, immutable data in ArcGIS formats, typically feature
+    |       └── raw.gdb    <- Original, immutable data in ArcGIS formats - typically feature
     |                         classes. 
     │
     ├── docs               <- A default Sphinx project; see sphinx-doc.org for details
     │
-    ├── models             <- Trained and serialized models, model predictions, or model summaries
-    |   │                     
+    ├── models             <- Trained and serialized models, model predictions, or model summaries.          
     │   └── data_processing_tempate.ipynb
+    │
     ├── notebooks          <- Jupyter notebooks. Naming convention is a 2 digits (for ordering),
     │                         descriptive name. e.g.: 01_exploratory_analysis.ipynb
     │
@@ -45,4 +45,4 @@
     └── {{ cookiecutter.support_library }} <- Source code for use in this project.
 ```
 
-<p><small>Project based on the <a target="_blank" href="https://github.com/knu2xs/geoai-retail">GeoAI-Retail cookiecutter project template</a>.</small></p>
+<p><small>Project based on the <a target="_blank" href="https://github.com/knu2xs/geoai-retail">GeoAI-Retail CookieCutter project template</a>.</small></p>
