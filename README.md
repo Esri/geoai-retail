@@ -1,6 +1,6 @@
-# Cookiecutter GeoAI
+# GeoAI-Retail
 
-_A logical, reasonably standardized, but flexible project structure for doing and sharing GeoAI retail, geographic artificial intelligence retail analysis work._
+_A GeoAI CookieCutter template for retail - a logical, reasonably standardized, but flexible project structure for performing and sharing retail geographic machine learning analysis work._
 
 This cookiecutter template is designed to be used for GeoAI, geographic data science work utilizing ArcGIS Pro combined with Python machine learning technologies.
 
@@ -15,14 +15,17 @@ This cookiecutter template is designed to be used for GeoAI, geographic data sci
 ```
 
 
-### To start a new project, run:
+### Getting Started
 ------------
+First, use CookieCutter to create a new project according to this template.
 
 ``` cmd
 > cookiecutter https://github.com/knu2xs/geoai-retail
 ```
 
-### The resulting directory structure
+Next, although not completely necessary, it is highly recommended to also create a Conda environment for performing analysis. For the `arcpy` bindings to work in the new environment you cannot simply create a new environment using the normal `conda create` command. Due to this, please run the `create_env.cmd` script. This will create a new environment with a few extra packages required for the workflows included in this template to work. Most notably, one of the required packages includes the companion project to this, [BA-Tools](https://github.com/knu2xs/ba-tools).
+
+### Project Structure
 ------------
 
 The directory structure of your new project will look like this: 
@@ -31,6 +34,8 @@ The directory structure of your new project will look like this:
     ├── LICENSE
     ├── .env               <- Any environment variables here.
     ├── README.md          <- The top-level README for developers using this project.
+    ├── environment.yml    <- Conda environment file.
+    ├── create_env.cmd     <- Conda environment creation script.   
     │
     ├── arcgis             <- Root location for ArcGIS Pro project created as part of
     │                         data science project creation.
