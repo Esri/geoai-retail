@@ -7,12 +7,9 @@ channels:
 dependencies:
   - arcgis>=1.7.0
   - ba-tools
-  - fastparquet
   - nodejs
-  - pillow
   - pyarrow
+  - pylint
   - pytest
   - python-dotenv
   - scikit-learn
-  - shapely
-  - snappy
