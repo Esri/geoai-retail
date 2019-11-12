@@ -23,7 +23,9 @@ First, use CookieCutter to create a new project according to this template.
 > cookiecutter https://github.com/knu2xs/geoai-retail
 ```
 
-Next, although not completely necessary, it is highly recommended to also create a Conda environment for performing analysis. For the `arcpy` bindings to work in the new environment you cannot simply create a new environment using the normal `conda create` command. Due to this, please run the `create_env.cmd` script. This will create a new environment with a few extra packages required for the workflows included in this template to work. Most notably, one of the required packages includes the companion project to this, [BA-Tools](https://github.com/knu2xs/ba-tools).
+Next, although not completely necessary, it is highly recommended to also create a Conda environment for performing analysis. For the `arcpy` bindings to work in the new environment you cannot simply create a new environment using the normal `conda create` command. 
+
+Do this by opening the ArcGIS Python Command Prompt (Start > Programs > ArcGIS > Python Commmand Promp). Next, simply open the ArcGIS Python Command Prompt as a user. Again, navigate to your project directory, and run the `create_env.cmd` script. This will create a new environment with the required companion project to this, [BA-Tools](https://github.com/knu2xs/ba-tools).
 
 ### Project Structure
 ------------
