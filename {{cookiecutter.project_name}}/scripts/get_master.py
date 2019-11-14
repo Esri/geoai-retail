@@ -13,14 +13,14 @@ gdb_raw = data_raw/'raw.gdb'
 gdb_int = data_int/'interim.gdb'
 
 # customize the three six variables below to match your data
-origin_fc = str(gdb_raw/'origin_block_groups')
-origin_id_fld = str('ID')
+origin_fc = str(gdb_raw/'origin_geography')
+origin_id_fld = str('origin_id')
 
-location_fc = str(gdb_raw/'locations')
-location_id_fld = 'LOCNUM'
+location_fc = str(gdb_raw/'location')
+location_id_fld = 'dest_id'
 
 location_competition_fc = str(gdb_raw/'location_competition')
-location_competition_id_fld = 'LOCNUM'
+location_competition_id_fld = 'comp_dest_id'
 
 # this pipeline is based based on origin areas, brand locations, and competition locations
 pipe = Pipeline([

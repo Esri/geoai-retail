@@ -395,21 +395,12 @@ class ExportDataForMachineLearning(object):
             # get any applicable transformations if the datum of the input is not WGS84
             trans_lst = arcpy.ListTransformations(lyr_sr, arcpy.SpatialReference(4326))
 
-            # since the project tool fails on a lot of the layers created, copy to intermediate feature class
-            temp_fc = arcpy.management.CopyFeatures(
-                in_features=lyr,
-                out_feature_class=os.path.join(self.gdb, 'temp_features')
-            )[0]
-
             # if a transformation is necessary, project using it, otherwise project without
             out_sr = arcpy.SpatialReference(4326)
             if len(trans_lst):
                 in_feat = arcpy.management.Project(lyr, temp_fc, out_sr, trans_lst[0])[0]
             else:
                 in_feat = arcpy.management.Project(lyr, temp_fc, out_sr)[0]
-
-            # take out the trash
-            arcpy.management.Delete(temp_fc)
 
         # if the input is in WGS84, just let the input pass through
         else:
@@ -456,7 +447,7 @@ class ExportDataForMachineLearning(object):
             self.aprx_map.addLayer(loc_lyr)
 
         if comp_loc_lyr:
-            comp_out_fc = os.path.join(self.gdb, 'locatiion_competition')
+            comp_out_fc = os.path.join(self.gdb, 'location_competition')
             self._create_output_features(comp_loc_lyr, comp_id_fld, comp_out_fc, 'comp_dest_id')
             comp_lyr = arcpy.management.MakeFeatureLayer(comp_out_fc, 'Competition Locations')[0]
             self.aprx_map.addLayer(comp_lyr)
