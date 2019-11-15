@@ -320,6 +320,16 @@ class ExportDataForMachineLearning(object):
         )
         comp_id_fld.parameterDependencies = [comp_loc_lyr.name]
 
+        comp_brnd_nm = arcpy.Parameter(
+            name='comp_brnd_nm',
+            displayName='Competition Brand Name Field',
+            direction='Input',
+            datatype='Field',
+            parameterType='Optional',
+            enabled=False
+        )
+        comp_brnd_nm.parameterDependencies = [comp_loc_lyr.name]
+
         origin_geo_lyr = arcpy.Parameter(
             name='origin_geo_lyr',
             displayName='Origin Geography Layer',
@@ -340,7 +350,7 @@ class ExportDataForMachineLearning(object):
         )
         origin_id_fld.parameterDependencies = [origin_geo_lyr.name]
 
-        params = [loc_lyr, loc_id_fld, comp_loc_lyr, comp_id_fld, origin_geo_lyr, origin_id_fld]
+        params = [loc_lyr, loc_id_fld, comp_loc_lyr, comp_id_fld, comp_brnd_nm, origin_geo_lyr, origin_id_fld]
         return params
 
     def isLicensed(self):
@@ -363,18 +373,23 @@ class ExportDataForMachineLearning(object):
         if parameters[2].value:
             parameters[3].enabled = True
             parameters[3].parameterType = 'Required'
+            parameters[4].enabled = True
+            parameters[4].parameterType = 'Required'
         elif not parameters[2].value:
             parameters[3].value = None
             parameters[3].enabled = False
             parameters[3].parameterType = 'Optional'
+            parameters[4].value = None
+            parameters[4].enabled = False
+            parameters[4].parameterType = 'Optional'
 
-        if parameters[4].value:
-            parameters[5].enabled = True
-            parameters[5].parameterType = 'Required'
-        elif not parameters[4].value:
-            parameters[5].value = None
-            parameters[5].enabled = False
-            parameters[5].parameterType = 'Optional'
+        if parameters[5].value:
+            parameters[6].enabled = True
+            parameters[6].parameterType = 'Required'
+        elif not parameters[5].value:
+            parameters[6].value = None
+            parameters[6].enabled = False
+            parameters[6].parameterType = 'Optional'
 
         return
 
@@ -383,7 +398,7 @@ class ExportDataForMachineLearning(object):
         parameter.  This method is called after internal validation."""
         return
 
-    def _create_output_features(self, lyr, id_fld_name, out_fc, out_id_fld):
+    def _create_output_features(self, lyr, id_fld_name, out_fc, out_id_fld, in_name_fld=None, out_name_fld=None):
         """Function handling output creation."""
 
         # get the spatial reference of the input layer
@@ -396,6 +411,7 @@ class ExportDataForMachineLearning(object):
             trans_lst = arcpy.ListTransformations(lyr_sr, arcpy.SpatialReference(4326))
 
             # if a transformation is necessary, project using it, otherwise project without
+            temp_fc = os.path.join(arcpy.env.scratchGDB, 'temp_features')
             out_sr = arcpy.SpatialReference(4326)
             if len(trans_lst):
                 in_feat = arcpy.management.Project(lyr, temp_fc, out_sr, trans_lst[0])[0]
@@ -420,11 +436,15 @@ class ExportDataForMachineLearning(object):
             raise Exception(
                 'One or more of the features appear to be missing a value. There cannot be any null or empty values.')
 
-        # filter to only needed fields
-        df = df[[id_fld_name, 'SHAPE']].copy()
 
-        # rename the output id field ot desired name
-        df.rename(columns={id_fld_name: out_id_fld}, inplace=True)
+        if in_name_fld:
+            # filter to only needed fields
+            df = df[[id_fld_name, in_name_fld, 'SHAPE']].copy()
+            df.rename(columns={id_fld_name: out_id_fld, in_name_fld: out_name_fld}, inplace=True)
+        else:
+            # rename the output id field ot desired name
+            df = df[[id_fld_name, 'SHAPE']].copy()
+            df.rename(columns={id_fld_name: out_id_fld}, inplace=True)
 
         # save and return the result
         return df.spatial.to_featureclass(out_fc)
@@ -437,25 +457,30 @@ class ExportDataForMachineLearning(object):
         loc_id_fld = parameters[1].valueAsText
         comp_loc_lyr = parameters[2].value
         comp_id_fld = parameters[3].valueAsText
-        origin_geo_lyr = parameters[4].value
-        origin_id_fld = parameters[5].valueAsText
+        comp_brnd_nm = parameters[4].valueAsText
+        origin_geo_lyr = parameters[5].value
+        origin_id_fld = parameters[6].valueAsText
+
+        if comp_loc_lyr:
+            comp_out_fc = os.path.join(self.gdb, 'location_competition')
+            self._create_output_features(comp_loc_lyr, comp_id_fld, comp_out_fc, 'comp_dest_id', comp_brnd_nm,
+                                         'comp_brand_name')
+            # comp_lyr = arcpy.management.MakeFeatureLayer(comp_out_fc, 'Competition Locations')[0]
+            comp_lyr = arcpy.mp.LayerFile('./layer_files/competition.lyrx')
+            self.aprx_map.addLayer(comp_lyr)
 
         if loc_lyr:
             loc_out_fc = os.path.join(self.gdb, 'location')
             self._create_output_features(loc_lyr, loc_id_fld, loc_out_fc, 'dest_id')
-            loc_lyr = arcpy.management.MakeFeatureLayer(loc_out_fc, 'Business Locations')[0]
+            # loc_lyr = arcpy.management.MakeFeatureLayer(loc_out_fc, 'Business Locations')[0]
+            loc_lyr = arcpy.mp.LayerFile('./layer_files/business.lyrx')
             self.aprx_map.addLayer(loc_lyr)
-
-        if comp_loc_lyr:
-            comp_out_fc = os.path.join(self.gdb, 'location_competition')
-            self._create_output_features(comp_loc_lyr, comp_id_fld, comp_out_fc, 'comp_dest_id')
-            comp_lyr = arcpy.management.MakeFeatureLayer(comp_out_fc, 'Competition Locations')[0]
-            self.aprx_map.addLayer(comp_lyr)
 
         if origin_geo_lyr:
             orig_out_fc = os.path.join(self.gdb, 'origin_geography')
             self._create_output_features(origin_geo_lyr, origin_id_fld, orig_out_fc, 'origin_id')
-            orig_lyr = arcpy.management.MakeFeatureLayer(orig_out_fc, 'Origin Geographies')[0]
+            # orig_lyr = arcpy.management.MakeFeatureLayer(orig_out_fc, 'Origin Geographies')[0]
+            orig_lyr = arcpy.mp.LayerFile('./layer_files/origin_geo.lyrx')
             self.aprx_map.addLayer(orig_lyr)
 
         return True
