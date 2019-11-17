@@ -13,13 +13,13 @@ gdb_raw = data_raw/'raw.gdb'
 gdb_int = data_int/'interim.gdb'
 
 # customize the three six variables below to match your data
-origin_fc = str(gdb_raw/'origin_geography')
-origin_id_fld = str('origin_id')
+origin_fc = str(gdb_int/'origin_geography')
+origin_id_fld = 'origin_id'
 
-location_fc = str(gdb_raw/'location')
+location_fc = str(gdb_int/'location')
 location_id_fld = 'dest_id'
 
-location_competition_fc = str(gdb_raw/'location_competition')
+location_competition_fc = str(gdb_int/'location_competition')
 location_competition_id_fld = 'comp_dest_id'
 
 # this pipeline is based based on origin areas, brand locations, and competition locations
@@ -29,7 +29,7 @@ pipe = Pipeline([
         origin_geography_layer=origin_fc,
         geography_id_field=origin_id_fld,
         interim_data_directory=data_int
-     )),
+    )),
     ('near_locations', preprocessing.AddNearestLocationsToOriginDataframe(
         origin_geography_layer=origin_fc,
         origin_id_field=origin_id_fld,
