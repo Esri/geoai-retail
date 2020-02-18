@@ -1,73 +1,74 @@
-# GeoAI-Retail
+# [GeoAI-Cookiecutter](https://arcgis.github.io/geoai-cookiecutter)
 
-_A GeoAI CookieCutter template for retail - a logical, reasonably standardized, but flexible project structure for performing and sharing retail geographic machine learning analysis work._
+[GeoAI-Cookiecutter Project Homepage](https://arcgis.github.io/geoai-cookiecutter)
 
-This cookiecutter template is designed to be used for GeoAI, geographic data science work utilizing ArcGIS Pro combined with Python machine learning technologies.
+GeoAI-Cookiecutter strives to streamline and promote use of best practices for projects combining Geography and Artificial Intelligence through a logical, reasonably standardized, and flexible project structure.
 
-### Requirements to use the cookiecutter template:
------------
- - ArcGIS Pro 3.4+ with the Business Analyst extension _and_ the Business Analyst data pack for the United States
- - Python 3.5+ with ArcPy (this is fulfilled by ArcGIS Pro)
- - [Cookiecutter](http://cookiecutter.readthedocs.org/en/latest/installation.html) >= 1.4.0: This can be installed with Conda:
+GeoAI-Cookiecutter project grew out of a need within the Advanced Analytics team at Esri to streamline project bootstrapping, encourage innovation, increase repeatability, encourage documentation, and encourage best practices.
 
-``` cmd
+## Requirements to use the cookiecutter template:
+ * ArcGIS Pro 2.4 or greater (Python 3.6 and Conda come with it)
+ * [Cookiecutter](http://cookiecutter.readthedocs.org/en/latest/installation.html) >= 1.4.0
+
+``` bash
 > conda install -c conda-forge cookiecutter
 ```
 
 
-### Getting Started
-------------
-First, use CookieCutter to create a new project according to this template.
+## To start a new project, run:
 
-``` cmd
-> cookiecutter https://github.com/knu2xs/geoai-retail
+``` bash
+> cookiecutter https://github.com/ArcGIS/geoai-cookiecutter
 ```
 
-Next, although not completely necessary, it is highly recommended to also create a Conda environment for performing analysis. For the `arcpy` bindings to work in the new environment you cannot simply create a new environment using the normal `conda create` command. 
-
-Do this by opening the ArcGIS Python Command Prompt (Start > Programs > ArcGIS > Python Commmand Promp). Next, simply open the ArcGIS Python Command Prompt as a user. Again, navigate to your project directory, and run the `create_env.cmd` script. This will create a new environment with the required companion project to this, [BA-Tools](https://github.com/knu2xs/ba-tools).
-
-### Project Structure
-------------
+## The resulting directory structure
 
 The directory structure of your new project will look like this: 
 
 ```
     ├── LICENSE
-    ├── .env               <- Any environment variables here.
+    ├── Makefile           <- Makefile with commands like `make data`
+    ├── make.bat           <- Windows batch file with commands like `make data`
+    ├── setup.py           <- Setup script for the library ({{ cookiecutter.support_library }})
+    ├── .env               <- Any environment variables here - created as part of project creation, 
+    │                         but NOT syncronized with git repo for project.                
     ├── README.md          <- The top-level README for developers using this project.
-    ├── environment.yml    <- Conda environment file.
-    ├── create_env.cmd     <- Conda environment creation script.   
-    │
     ├── arcgis             <- Root location for ArcGIS Pro project created as part of
-    │                         data science project creation.
-    │
+    │   │                     data science project creation.
+    │   ├── {{ cookiecutter.project_name }}.aprx <- ArcGIS Pro project.    
+    │   └── {{ cookiecutter.project_name }}.tbx  <- ArcGIS Pro toolbox associated with the project.
     ├── scripts            <- Put scripts to run things here.
-    |   │
-    |   └── data           <- Scripts to download or generate data
-    |       └── make_data.py
-    |
     ├── data
     │   ├── external       <- Data from third party sources.
     │   ├── interim        <- Intermediate data that has been transformed.
-    |   │   └── interim.gdb<- Intermediate ArcGIS data that has been transformed.
-    |   │
+    │   │   └── interim.gdb
     │   ├── processed      <- The final, canonical data sets for modeling.
+    │   │   └── processed.gdb
     │   └── raw            <- The original, immutable data dump.
-    |       └── raw.gdb    <- Original, immutable data in ArcGIS formats - typically feature
-    |                         classes. 
-    │
+    │       └── raw.gdb
     ├── docs               <- A default Sphinx project; see sphinx-doc.org for details
-    │
-    ├── models             <- Trained and serialized models, model predictions, or model summaries.          
-    │   └── data_processing_tempate.ipynb
-    │
+    ├── models             <- Trained and serialized models, model predictions, or model summaries
     ├── notebooks          <- Jupyter notebooks. Naming convention is a 2 digits (for ordering),
-    │                         descriptive name. e.g.: 01_exploratory_analysis.ipynb
-    │
+    │   │                     descriptive name. e.g.: 01_exploratory_analysis.ipynb
+    │   └── notebook_template.ipynb
     ├── references         <- Data dictionaries, manuals, and all other explanatory materials.
-    │
     ├── reports            <- Generated analysis as HTML, PDF, LaTeX, etc.
     │   └── figures        <- Generated graphics and figures to be used in reporting
-    └── {{ cookiecutter.support_library }} <- Source code for use in this project.
+    ├── environment.yml    <- The requirements file for reproducing the analysis environment. This 
+    │                         is generated by running `conda env export > environment.yml` or
+    │                         `make env_export`.                         
+    └── src                <- Source code for use in this project.
+        └── {{ cookiecutter.support_library }} <- Library containing the bulk of code used in this 
+                                                  project. 
 ```
+
+## Licensing
+Copyright 2020 Esri
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+
+A copy of the license is available in the repository's [LICENSE](LICENSE?raw=true) file.

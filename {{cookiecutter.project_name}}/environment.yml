@@ -1,0 +1,28 @@
+name: {{ cookiecutter.conda_environment_name }}
+
+channels:
+  - esri
+  - conda-forge
+  - defaults
+
+dependencies:
+  - arcgis==1.7.1
+  - cookiecutter
+  - dask
+  - mkdocs
+  - nodejs
+  - pillow
+  - pyarrow
+  - pylint
+  - pytest
+  - python-dotenv
+  - scipy
+  - scikit-learn
+  - seaborn
+  - shapely
+  - swifter
+  - pip:
+    - azure-storage-blob
+    - ipykernel
+    - sphinx
+  
