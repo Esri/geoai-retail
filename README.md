@@ -18,7 +18,7 @@ GeoAI-Retail is an adaptation of GeoAI-Cookiecutter tailored for  retail analysi
 ## To start a new project, run:
 
 ``` bash
-> cookiecutter https://github.com/ArcGIS/geoai-cookiecutter
+> cookiecutter https://github.com/ArcGIS/geoai-retail
 ```
 
 ## The resulting directory structure

@@ -1,10 +1,9 @@
 site_name: GeoAI-Retail
-site_url: https://github.com/ArcGIS/geoai-retail
+site_url: https://github.com/knu2xs/geoai-retail
 site_description: A project template and directory structure for Python geograpihc data science retail analysis.
 site_author: Esri Advanced Analytics Team
-site_favicon: favicon.ico
 repo_name: GeoAI-Retail on GitHub
-repo_url: https://github.com/ArcGIS/geoai-retail
+repo_url: https://github.com/knu2xs/geoai-retail
 edit_uri: ""
 copyright: Esri Advanced Analytics Team
 theme: cinder
