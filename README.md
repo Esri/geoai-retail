@@ -1,10 +1,10 @@
-# [GeoAI-Cookiecutter](https://arcgis.github.io/geoai-cookiecutter)
+# [GeoAI-Retail](https://knu2xs.github.io/geoai-retail)
 
-[GeoAI-Cookiecutter Project Homepage](https://arcgis.github.io/geoai-cookiecutter)
+[GeoAI-Retail Project Homepage](https://knu2xs.github.io/geoai-retail)
 
-GeoAI-Cookiecutter strives to streamline and promote use of best practices for projects combining Geography and Artificial Intelligence through a logical, reasonably standardized, and flexible project structure.
+GeoAI-Retail is an [opinionated](https://medium.com/@stueccles/the-rise-of-opinionated-software-ca1ba0140d5b) analysis template striving to streamline and promote use of best practices for projects combining Geography and Artificial Intelligence for retail through a logical, reasonably standardized, and flexible project structure. A high level overview of the methods implemented in GeoAI-Retail is discussed in the [Customer-Centric Analysis StoryMap](https://storymaps.arcgis.com/stories/76006dd166294e6fae7e6164a1ff0a4a). 
 
-GeoAI-Cookiecutter project grew out of a need within the Advanced Analytics team at Esri to streamline project bootstrapping, encourage innovation, increase repeatability, encourage documentation, and encourage best practices.
+GeoAI-Retail is an adaptation of GeoAI-Cookiecutter tailored for  retail analysis workflows. GeoAI-Cookiecutter grew out of a need within the Advanced Analytics team at Esri to streamline project bootstrapping, encourage innovation, increase repeatability, encourage documentation, and encourage best practices based on [strong opinions (best practices)](https://knu2xs.github.io/geoai-retail#opinions). GeoAI-Retail implements these opinions with additional tight integration to the Esri Business Analyst extension capabilities heavily relying functionality from the [BA-Tools Python package](https://anaconda.org/knu2xs/ba-tools). This enables a data driven approach to model the relationship between who and where customers are, and customers' relationships to physical store locations using artificial intelligence. 
 
 ## Requirements to use the cookiecutter template:
  * ArcGIS Pro 2.4 or greater (Python 3.6 and Conda come with it)
@@ -36,7 +36,8 @@ The directory structure of your new project will look like this:
     ├── arcgis             <- Root location for ArcGIS Pro project created as part of
     │   │                     data science project creation.
     │   ├── {{ cookiecutter.project_name }}.aprx <- ArcGIS Pro project.    
-    │   └── {{ cookiecutter.project_name }}.tbx  <- ArcGIS Pro toolbox associated with the project.
+    │   ├── {{ cookiecutter.project_name }}.tbx  <- ArcGIS Pro toolbox associated with the project.
+    │   └── GeoAI-Tools.tbx  <- Tools streamlining the process of project setup tying into Esri Business Analyst data.
     ├── scripts            <- Put scripts to run things here.
     ├── data
     │   ├── external       <- Data from third party sources.
