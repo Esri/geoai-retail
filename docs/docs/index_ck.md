@@ -1,10 +1,10 @@
-# GeoAI-Retail
+# GeoAI-Cookiecutter
 
-GeoAI-Retail is an [opinionated](https://medium.com/@stueccles/the-rise-of-opinionated-software-ca1ba0140d5b) analysis template striving to streamline and promote use of best practices for projects combining Geography and Artificial Intelligence for retail through a logical, reasonably standardized, and flexible project structure. A high level overview of the methods implemented in GeoAI-Retail is discussed in the [Customer-Centric Analysis StoryMap (open full size)](https://storymaps.arcgis.com/stories/76006dd166294e6fae7e6164a1ff0a4a). 
+GeoAI-Cookiecutter is an [opionated](https://medium.com/@stueccles/the-rise-of-opinionated-software-ca1ba0140d5b) analysis template striving to streamline and promote use of best practices for projects combining Geography and Artificial Intelligence through a logical, reasonably standardized, and flexible project structure.
 
-<iframe src="https://storymaps.arcgis.com/stories/76006dd166294e6fae7e6164a1ff0a4a" width="825" height="464" frameborder="0"></iframe>
+[![Esri Logo][esrilogo]](https://www.esri.com/en-us/arcgis/products/spatial-analytics-data-science/overview)
 
-GeoAI-Retail is an adaptation of GeoAI-Cookiecutter tailored for  retail analysis workflows. GeoAI-Cookiecutter grew out of a need within the Advanced Analytics team at Esri to streamline project bootstrapping, encourage innovation, increase repeatability, encourage documentation, and encourage best practices based on [strong opinions (best practices)](#opinions). GeoAI-Retail implements these opinions with additional tight integration to the Esri Business Analyst extension capabilities. This enables a data driven approach to model the relationship between who and where customers are, and customers' relationships to physical store locations using artificial intelligence. 
+GeoAI-Cookiecutter grew out of a need within the Advanced Analytics team at Esri to streamline project bootstrapping, encourage innovation, increase repeatability, encourage documentation, and encourage best practices based on [strong opinions (best practices)](#opinions).
 
 ## Why use this project structure?
 
@@ -30,7 +30,7 @@ Disorganization is frustrating and dramatically adversely affects _your_ product
 
 > "A foolish consistency is the hobgoblin of little minds" — Ralph Waldo Emerson (and [PEP 8!](https://www.python.org/dev/peps/pep-0008/#a-foolish-consistency-is-the-hobgoblin-of-little-minds))
 
-GeoAI-Retail is a _starting point_ for projects, but is not absolute. If details do not work, change them in your project based on your needs, _but be consistent_. After all, this is how GeoAI-Retail came into existence! [Cookiecutter Data Science](http://drivendata.github.io/cookiecutter-data-science/) is an excellent template for data science work, but did not meet all the needs for marrying Geographic and Artificial Intelligence analysis workflows. We extended and modified this template to achieve consistency addressing our additional needs.
+GeoAI-Cookiecutter is a _starting point_ for projects, but is not absolute. If details do not work, change them in your project based on your needs, _but be consistent_. After all, this is how GeoAI-Cookiecutter came into existence! [Cookiecutter Data Science](http://drivendata.github.io/cookiecutter-data-science/) is an excellent template for data science work, but did not meet all the needs for marrying Geographic and Artificial Intelligence analysis workflows. We extended and modified this template to achieve consistency addressing our additional needs.
 
 Even within a project, if something does not work, simply follow the path that _does_ work, but do it with _consistency_. This way, for yourself and others looking at your work, your workflows and code will make sense.
 
@@ -40,12 +40,12 @@ Asking is important! _Learn_ from peers and colleagues.
 
 ## Getting Started
 
-GeoAI-Retail provides a template for starting projects taking advantage of the combined capabilities of [ArcGIS Pro](https://www.esri.com/en-us/arcgis/products/arcgis-pro/overview) with the [Business Analyst Extension](https://www.esri.com/en-us/arcgis/products/arcgis-business-analyst/resources), Esri Cloud GIS ([ArcGIS Enterprise](https://enterprise.arcgis.com/en/) or [ArcGIS Online](https://www.arcgis.com/index.html)), and the broad ecosystem of Machine Learning technologies using Python in a [Conda](https://docs.conda.io/en/latest/) environment.
+GeoAI-Cookiecutter provides a template for starting projects taking advantage of the combined capabilities of [ArcGIS Pro](https://www.esri.com/en-us/arcgis/products/arcgis-pro/overview), Esri Cloud GIS ([ArcGIS Enterprise](https://enterprise.arcgis.com/en/) or [ArcGIS Online](https://www.arcgis.com/index.html)), and the broad ecosystem of Machine Learning technologies using Python in a [Conda](https://docs.conda.io/en/latest/) environment. Although it is designed to accommodate environments _not_ including ArcGIS Pro, it then becomes little more than Cookiecutter Data Science. Consequently, it is _highly_ recommended you use GeoAI-Cookiecutter in an ArcGIS Pro Python Conda environment, which is installed with ArcGIS Pro.
 
 #### Requirements
 
 * ArcGIS Pro 2.4 or greater (Python 3.6 and Conda come with it)
-* Cookiecutter >= 1.4.0
+* Cookiecutter
 
 Cookiecutter is _not_ installed by default, but can easily be installed by opening the Python Command Prompt by going to Start > Programs > ArcGIS > Python Command Prompt. This opens a command prompt with the default Conda environment for ArcGIS Pro activated. This environment is named `arcgispro-py3`, and is in parentheses prefixing the normal command prompt on the left side.
 
@@ -69,10 +69,10 @@ Finally, install Cookiecutter.
 
 #### Starting a New Project
 
-Now, once you have Cookiecutter installed in an environment, you can use the GeoAI-Retail template to quickly start a new project.
+Now, once you have Cookiecutter installed in an environment, you can use the GeoAI-Cookiecutter template to quickly start a new project.
 
 ```batch
-> cookiecutter https://github.com/knu2xs/geoai-retail
+> cookiecutter https://github.com/arcgis/geoai-cookiecutter
 ```
 
 Once you answer all the questions, the new project is now created as a new directory in the current working directory. Assuming your project name is `sik-pro`, your new Conda environment is going to be named `sik_pro`. Hence, to create this environment, run the following.
@@ -90,7 +90,7 @@ The video below walks through not only the process of making a new project, but 
 
 ## Project Organization and Structure
 
-The GeoAI-Retail template provides a structure for project resources, marrying data science directory structure with the functionality of ArcGIS Pro. This primarily means organizing the project following most of the best practices and conventions from Cookiecutter Data Science, and adapting ArcGIS Pro to easily work within this paradigm.
+The GeoAI-Cookiecutter template provides a structure for project resources, marrying data science directory structure with the functionality of ArcGIS Pro. This primarily means organizing the project following most of the best practices and conventions from Cookiecutter Data Science, and adapting ArcGIS Pro to easily work within this paradigm.
 
 ### Directory Structure
 
@@ -147,7 +147,7 @@ Opinions guide best practices, but are still only opinions. However, following t
 
 The available machine learning and deep learning technologies available in Python is staggering. Fortunately, a large number of them are available simply as installable pip or conda packages. A very large part of reproducibility is being able to reproduce the environment. 
 
-GeoAI-Retail facilitates this process by streamlining the process of creating a full functioning new Conda environment for a new project. To create a project preflighted with a few useful packages, simply ensure you are in the root of the project and type the following into the command line.
+GeoAI-Cookiecutter facilitates this process by streamlining the process of creating a full functioning new Conda environment for a new project. To create a project preflighted with a few useful packages, simply ensure you are in the root of the project and type the following into the command line.
 
 ```bash
 > make env
@@ -180,7 +180,7 @@ Leaving original data unchanged, and building an automated data transformation p
 
 This is the explicit purpose of the `./data/raw` directory. Put your untouched raw data in this directory, and develop the pipeline to transform this data into a usable form, placing this usable data into the `./data/interim` directory.
 
-Further, to repeat the work, the data does not _necessarily_ need to be in source control. By default, due to both this reason, and the common limitation of GitHub to store large files, the `./data` directory is excluded from synchronization with source control in the `.gitignore` file. As a supplementary option for enabling access to the data, GeoAI-Retail includes the capability to upload and download data using [Azure Blob Storage](https://azure.microsoft.com/en-us/services/storage/blobs/).
+Further, to repeat the work, the data does not _necessarily_ need to be in source control. By default, due to both this reason, and the common limitation of GitHub to store large files, the `./data` directory is excluded from synchronization with source control in the `.gitignore` file. As a supplementary option for enabling access to the data, GeoAI-Cookiecutter includes the capability to upload and download data using [Azure Blob Storage](https://azure.microsoft.com/en-us/services/storage/blobs/).
 
 ### Analysis is a DAG
 
@@ -192,7 +192,7 @@ This is useful both in development of the data pipeline and even in production. 
 
 ### Keep Secrets _Out_ of Version Control
 
-Sharing your work is highly encouraged, but sharing sensitive information definitely is _not_. Almost without exception, compromsing credentials or tokens granting access to company or organiztion resources can quickly compromise your position with the organization. Please do not do this. To protect access to information, _never_ put passwords or other sensitive information into any files synchronized with version control. GeoAI-Retail implements the convention of Cookiecutter Data Science by keeping this sensitive information in a special file excluded from version control, and provides a method of easily accessing these values from anywhere in the project.
+Sharing your work is highly encouraged, but sharing sensitive information definitely is _not_. Almost without exception, compromsing credentials or tokens granting access to company or organiztion resources can quickly compromise your position with the organization. Please do not do this. To protect access to information, _never_ put passwords or other sensitive information into any files synchronized with version control. GeoAI-Cookiecutter implements the convention of Cookiecutter Data Science by keeping this sensitive information in a special file excluded from version control, and provides a method of easily accessing these values from anywhere in the project.
 
 #### Special File `.env`
 
@@ -235,13 +235,13 @@ GeoAI-Cookiectutter is bulit on the shoulders of giants. It is merely an evolout
 
 [![drivendata][drivendata]](https://www.drivendata.org)
 
-Huge thank you to [DrivenData](https://www.drivendata.org) for creating the outstanding [Cookiecutter Data Science](https://drivendata.github.io/cookiecutter-data-science) template we used as the starting point for GeoAI-Retail. Cookiecutter Data Science provided the framework for initially addressing many of our team's internal collaboration challenges, and evolved into what you see here. DrivenData, we could not have done it without you! Thank you!
+Huge thank you to [DrivenData](https://www.drivendata.org) for creating the outstanding [Cookiecutter Data Science](https://drivendata.github.io/cookiecutter-data-science) template we used as the starting point for GeoAI-Cookiecutter. Cookiecutter Data Science provided the framework for initially addressing many of our team's internal collaboration challenges, and evolved into what you see here. DrivenData, we could not have done it without you! Thank you!
 
 ### [Cookiecutter](https://cookiecutter.readthedocs.io)
 
 [![cookiecutter][cookiecutter]](https://cookiecutter.readthedocs.io)
 
-Neither GeoAI-Retail nor Cookiecutter Data Science would be possible without the outstanding open source project Cookiecutter.
+Neither GeoAI-Cookiecutter nor Cookiecutter Data Science would be possible without the outstanding open source project Cookiecutter.
 
 ## Licensing
 Copyright 2020 Esri
