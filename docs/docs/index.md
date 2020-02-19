@@ -4,7 +4,7 @@ GeoAI-Retail is an [opinionated](https://medium.com/@stueccles/the-rise-of-opini
 
 <iframe src="https://storymaps.arcgis.com/stories/76006dd166294e6fae7e6164a1ff0a4a" width="825" height="464" frameborder="0"></iframe>
 
-GeoAI-Retail is an adaptation of GeoAI-Cookiecutter tailored for  retail analysis workflows. GeoAI-Cookiecutter grew out of a need within the Advanced Analytics team at Esri to streamline project bootstrapping, encourage innovation, increase repeatability, encourage documentation, and encourage best practices based on [strong opinions (best practices)](#opinions). GeoAI-Retail implements these opinions with additional tight integration to the Esri Business Analyst extension capabilities. This enables a data driven approach to model the relationship between who and where customers are, and customers' relationships to physical store locations using artificial intelligence. 
+GeoAI-Retail is an adaptation of GeoAI-Cookiecutter tailored for  retail analysis workflows. GeoAI-Cookiecutter grew out of a need within the Advanced Analytics team at Esri to streamline project bootstrapping, encourage innovation, increase repeatability, encourage documentation, and encourage best practices based on [strong opinions (best practices)](#opinions). GeoAI-Retail implements these opinions with additional tight integration to the Esri Business Analyst extension capabilities heavily relying functionality from the [BA-Tools Python package](https://anaconda.org/knu2xs/ba-tools). This enables a data driven approach to model the relationship between who and where customers are, and customers' relationships to physical store locations using artificial intelligence. 
 
 ## Why use this project structure?
 
