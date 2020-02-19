@@ -94,6 +94,7 @@ The GeoAI-Retail template provides a structure for project resources, marrying d
 
 ### Directory Structure
 
+
 ```
     ├── LICENSE
     ├── Makefile           <- Makefile with commands like `make data`
@@ -105,7 +106,8 @@ The GeoAI-Retail template provides a structure for project resources, marrying d
     ├── arcgis             <- Root location for ArcGIS Pro project created as part of
     │   │                     data science project creation.
     │   ├── {{ cookiecutter.project_name }}.aprx <- ArcGIS Pro project.    
-    │   └── {{ cookiecutter.project_name }}.tbx  <- ArcGIS Pro toolbox associated with the project.
+    │   ├── {{ cookiecutter.project_name }}.tbx  <- ArcGIS Pro toolbox associated with the project.
+    │   └── GeoAI-Tools.tbx  <- Tools streamlining the process of project setup tying into Esri Business Analyst data.
     ├── scripts            <- Put scripts to run things here.
     ├── data
     │   ├── external       <- Data from third party sources.
