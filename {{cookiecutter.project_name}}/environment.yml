@@ -4,9 +4,11 @@ channels:
   - esri
   - conda-forge
   - defaults
+  - knu2xs
 
 dependencies:
   - arcgis==1.7.1
+  - ba-tools
   - cookiecutter
   - dask
   - mkdocs
