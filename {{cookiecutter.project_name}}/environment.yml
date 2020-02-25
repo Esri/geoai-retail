@@ -23,6 +23,7 @@ dependencies:
   - seaborn
   - shapely
   - swifter
+  - tqdm
   - pip:
     - azure-storage-blob
     - ipykernel
