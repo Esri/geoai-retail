@@ -7,11 +7,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="A project template and directory structure for Python geograpihc data science retail analysis.">
     <meta name="author" content="Esri Advanced Analytics Team">
-    
-    <link rel="/knu2xs/geoai-retail/img/favicon.ico">
+    <link rel="canonical" href="https://github.com/knu2xs/geoai-retail/env_setup/">
+    <link rel="../img/favicon.ico">
 
     
-    <title>GeoAI-Retail</title>
+    <title>Environment Setup - GeoAI-Retail</title>
     
 
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/all.css">
@@ -19,12 +19,12 @@
     <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css">
     <link href='//rsms.me/inter/inter.css' rel='stylesheet' type='text/css'>
     <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&subset=latin-ext,latin' rel='stylesheet' type='text/css'>
-    <link href="/knu2xs/geoai-retail/css/bootstrap-custom.min.css" rel="stylesheet">
-    <link href="/knu2xs/geoai-retail/css/base.min.css" rel="stylesheet">
-    <link href="/knu2xs/geoai-retail/css/cinder.min.css" rel="stylesheet">
+    <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
+    <link href="../css/base.min.css" rel="stylesheet">
+    <link href="../css/cinder.min.css" rel="stylesheet">
 
     
-    <link href="/knu2xs/geoai-retail/css/extra.css" rel="stylesheet">
+    <link href="../css/extra.css" rel="stylesheet">
 
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
@@ -55,7 +55,7 @@
 
             <!-- Main title -->
 
-            <a class="navbar-brand" href="/knu2xs/geoai-retail/.">GeoAI-Retail</a>
+            <a class="navbar-brand" href="..">GeoAI-Retail</a>
         </div>
 
         <!-- Expanded navigation -->
@@ -65,24 +65,24 @@
                 
                 
                     <li >
-                        <a href="/knu2xs/geoai-retail/.">Home</a>
+                        <a href="..">Home</a>
                     </li>
                 
                 
                 
-                    <li class="dropdown">
+                    <li class="dropdown active">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">User Guide <b class="caret"></b></a>
                         <ul class="dropdown-menu">
                         
                             
 <li >
-    <a href="/knu2xs/geoai-retail/make/">Make</a>
+    <a href="../make/">Make</a>
 </li>
 
                         
                             
-<li >
-    <a href="/knu2xs/geoai-retail/env_setup/">Environment Setup</a>
+<li class="active">
+    <a href="./">Environment Setup</a>
 </li>
 
                         
@@ -98,6 +98,16 @@
                             <i class="fas fa-search"></i> Search
                         </a>
                     </li>
+                    <li >
+                        <a rel="prev" href="../make/">
+                            <i class="fas fa-arrow-left"></i> Previous
+                        </a>
+                    </li>
+                    <li class="disabled">
+                        <a rel="next" >
+                            Next <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </li>
                     <li>
                         <a href="https://github.com/knu2xs/geoai-retail">GeoAI-Retail on GitHub</a>
                     </li>
@@ -108,16 +118,64 @@
 
     <div class="container">
         
+        
+        <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="first-level active"><a href="#environment-setup">Environment Setup</a></li>
+            <li class="second-level"><a href="#clone-the-default-environment">Clone the Default Environment</a></li>
+                
+            <li class="second-level"><a href="#install-cookiecutter">Install Cookiecutter</a></li>
+                
+            <li class="second-level"><a href="#try-a-new-project">Try a New Project</a></li>
+                
+    </ul>
+</div></div>
+        <div class="col-md-9" role="main">
 
-    <div class="row-fluid">
-      <div id="main-content" class="span12">
-        <h1 id="404-page-not-found" style="text-align: center">404</h1>
-        <p style="text-align: center"><strong>Page not found</strong></p>
-        <p style="text-align: center"><a href="/knu2xs/geoai-retail">Home</a></p>
-      </div>
-    </div>
+<h1 id="environment-setup">Environment Setup</h1>
+<p>The environment for running GeoAI-Retail must start with ArcGIS Pro with the Business Analyst Extension using local data. The Python environment installed with ArcGIS Pro is an instance of Conda, GeoAI-Retail extends the functionality through a few more capabilities available in this environment with additional packages. This involves creating a new environment and installing a few additional packages. Broadly, the steps to get up and running include the following.</p>
+<ul>
+<li>Install ArcGIS Pro with Business Analyst and local data</li>
+<li>Clone the ArcGIS Pro default environment, <code>arcgispro-py3</code></li>
+<li>Install the <code>cookiecutter</code> package into the new environment</li>
+<li>Create a new project using the GeoAI-Retail template</li>
+</ul>
+<h2 id="clone-the-default-environment">Clone the Default Environment</h2>
+<p>Python in ArcGIS Pro runs in a discrete Conda environment. This environment <em>should</em> never be modified. Rather, a copy should be made, and modifications made to this copied environment. Further, if you are familiar with creating environments using an <code>environment.yml</code> file, this does not work due to the way the bindings work for accessing the functionality offered by ArcGIS Pro in Python through the <code>arcpy</code> module. Copying the default environment retains this functionality.</p>
+<p>After installation, interacting with the Python Conda environment installed with ArcGIS Pro through the command line is accessed by going to Start &gt; Programs &gt; Python Command Prompt.</p>
+<p>With the prompt open, to the left of the normal path in the command prompt, you will see the name of the Conda environment in parentheses. If you have not changed this, it will be <code>arcgispro-py3</code>. From this command prompt, you can begin by cloning the default Python environment using the following command. If following my convention, this new environment will be called <code>arcgis</code>.</p>
+<pre><code>&gt; conda create --name arcgis --clone arcgispro-py3
+</code></pre>
 
+<p>Next, activate the environment to begin working in it.</p>
+<pre><code>&gt; activate arcgis
+</code></pre>
 
+<p>Now, you will see this new environment name to the left of the command prompt in parenthesis.</p>
+<blockquote>
+<p>NOTE: If you want this available in <em>every</em> command window, you can add Conda to your PATH environment variable. I typically do this when setting up a new machine by opening up a command prompt as administrator and using the following command.</p>
+</blockquote>
+<pre><code>&gt; setx path &quot;%PATH%;C:\Program Files\ArcGIS\Pro\bin\Python\Scripts&quot;
+</code></pre>
+
+<h2 id="install-cookiecutter">Install Cookiecutter</h2>
+<p>To use Cookiecutter templates, you first need to install Cookiecutter. This can be performed using the following command.</p>
+<pre><code>conda install -c conda-forge cookiecutter  
+</code></pre>
+
+<p>Once installed, you can now use Cookiecutter templates to start new projects, <em>including</em> GeoAI-Retail.</p>
+<h2 id="try-a-new-project">Try a New Project</h2>
+<p>From here, you are ready to start a new project, and get to work. Try this by switching to a directory where you can create a new folder, ensuring the environment is active where you installed Cookiecutter (<code>arcgis</code> if you followed my convention) and running the following command.</p>
+<pre><code>&gt; cookiecutter https://github.com/knu2xs/geoai-cookiecutter
+</code></pre>
+
+<p>You will be asked to answer a few questions about your new project. For now, accepting the defaults will work for testing. Then, just to ensure everything is ready to start working, switch into the newly created directory, and try creating the Conda environment for your new project using the following command.</p>
+<pre><code>&gt; make env
+</code></pre>
+
+<p><a href="../make/#gt-make-env">This will create a Conda environment</a> and install a few useful packages to get started working using GeoAI-Retail. If all of this works successfully, you are ready to dig in and start doing analysis using GeoAI-Retail!</p></div>
+        
+        
     </div>
 
     <footer class="col-md-12 text-center">
@@ -133,12 +191,12 @@
         
     </footer>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="/knu2xs/geoai-retail/js/bootstrap-3.0.3.min.js"></script>
+    <script src="../js/bootstrap-3.0.3.min.js"></script>
     
-    <script>var base_url = "/knu2xs/geoai-retail"</script>
+    <script>var base_url = ".."</script>
     
-    <script src="/knu2xs/geoai-retail/js/base.js"></script>
-    <script src="/knu2xs/geoai-retail/search/main.js"></script>
+    <script src="../js/base.js"></script>
+    <script src="../search/main.js"></script>
 
     <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
