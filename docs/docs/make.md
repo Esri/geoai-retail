@@ -1,6 +1,6 @@
 # Make - Using Make Commands
 
-There is a _lot_ of functionality included in the GeoAI-Retail template. Instead of writing endless documentation detailing how to find and use all these resources, we have created a file, [`make.bat`](https://github.com/knu2xs/geoai-retail/blob/master/%7B%7Bcookiecutter.project_name%7D%7D/make.bat), containing shortcuts to accomplish a whole boatload of tasks. As with most all the functionality in this template, this came out of our own needs to streamline workflows, and not have to dig all around in the template to get boring and routing tasks accomplished. The commands available in `make.bat` fall into three general categories, data preprocessing, data management, and environment management.
+There is a _lot_ of functionality included in the GeoAI-Retail template. Instead of writing endless documentation detailing how to find and use all these resources, we have created a file, [`make.bat`](https://github.com/esri/geoai-retail/blob/master/%7B%7Bcookiecutter.project_name%7D%7D/make.bat), containing shortcuts to accomplish a whole boatload of tasks. As with most all the functionality in this template, this came out of our own needs to streamline workflows, and not have to dig all around in the template to get boring and routing tasks accomplished. The commands available in `make.bat` fall into three general categories, data preprocessing, data management, and environment management.
 
 ## Data Preprocessing
 
@@ -8,15 +8,15 @@ More than anything else, GeoAI-Retail is a geographic feature engineering engine
 
 ### `> make data`
 
-The initial step of preparing the data for analysis can take a decent amoumnt of time. The heavy lifting is performed using a script, [`make_data.py`](https://github.com/knu2xs/geoai-retail/blob/master/%7B%7Bcookiecutter.project_name%7D%7D/scripts/make_data.py). While this script can be run directly, to make life easier, you can invoke the script directly using the command `make data`.
+The initial step of preparing the data for analysis can take a decent amount of time. The heavy lifting is performed using a script, [`make_data.py`](https://github.com/esri/geoai-retail/blob/master/%7B%7Bcookiecutter.project_name%7D%7D/scripts/make_data.py). While this script can be run directly, to make life easier, you can invoke the script directly using the command `make data`.
 
 ## Data Management
 
-Although the code can be syncronized with version control, typically GitHub, datasets can be large, and frequently do not work well with version control. As a result, the data directory is excluded from version control in the `.gitignore` file, and can be saved to Azure Blob Storage.
+Although the code can be synchronized with version control, typically GitHub, datasets can be large, and frequently do not work well with version control. As a result, the data directory is excluded from version control in the `.gitignore` file, and can be saved to Azure Blob Storage.
 
 ### `> make get_data`
 
-This is particuarly useful when collaborating on a project. After retrieving a project from version control, you can retrieve the data needed for the project using this command. The data will be downloaded from Azure Blob storage using credentials saved in the `.env` file and automatically extracted to the `./data` directory.
+This is particularly useful when collaborating on a project. After retrieving a project from version control, you can retrieve the data needed for the project using this command. The data will be downloaded from Azure Blob storage using credentials saved in the `.env` file and automatically extracted to the `./data` directory.
 
 ### `> make push_data`
 

@@ -48,7 +48,7 @@ Once installed, you can now use Cookiecutter templates to start new projects, _i
 From here, you are ready to start a new project, and get to work. Try this by switching to a directory where you can create a new folder, ensuring the environment is active where you installed Cookiecutter (`arcgis` if you followed my convention) and running the following command.
 
 ```
-> cookiecutter https://github.com/knu2xs/geoai-cookiecutter
+> cookiecutter https://github.com/esri/geoai-retail
 ```
 
 You will be asked to answer a few questions about your new project. For now, accepting the defaults will work for testing. Then, just to ensure everything is ready to start working, switch into the newly created directory, and try creating the Conda environment for your new project using the following command.

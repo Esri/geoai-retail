@@ -144,7 +144,7 @@ __NOTE:__ The notebooks directory is included due to support for Jupyter Noteboo
 
 ## Opinions
 
-Opinions guide best practices, but are still only opinions. However, following the best practices and conventions laid out by these opinions will go a long ways towards achieving repeatability, facilitating collaboration and increasing both your _and_ your colleagues confidence in your work. In the case of our team, these opionions embody team practices and Esri company policies.
+Opinions guide best practices, but are still only opinions. However, following the best practices and conventions laid out by these opinions will go a long ways towards achieving repeatability, facilitating collaboration and increasing both your _and_ your colleagues confidence in your work. In the case of our team, these opinions embody team practices and Esri company policies.
 
 ### Autonomous Environment
 
@@ -164,7 +164,7 @@ If you add more packages to this environment, to ensure repeatability, simply ca
 
 This will replace the original `environment.yml`. This enables recreating the modified project environment on a new machine as simple as again using the `make env` command.
 
-__CAUTION:__ Simply using the normal Conda method of creating a new environment from the environment.yml file _will not work_. The new environment will not have `arcpy` available. To maintain the ability to use `arcpy`, the `arcgispro-py3` environment must be cloned, and then the new environment must be updated using the environment.yml file as a template. This is what the `make env` command automatically takes care of.
+__CAUTION:__ Simply using the normal Conda method of creating a new environment from the `environment.yml` file _will not work_. The new environment will not have `arcpy` available. To maintain the ability to use `arcpy`, the `arcgispro-py3` environment must be cloned, and then the new environment must be updated using the `environment.yml` file as a template. This is what the `make env` command automatically takes care of.
 
 ### Notebooks are for _Exploration_ and _Communication_
 
@@ -195,7 +195,7 @@ This is useful both in development of the data pipeline and even in production. 
 
 ### Keep Secrets _Out_ of Version Control
 
-Sharing your work is highly encouraged, but sharing sensitive information definitely is _not_. Almost without exception, compromsing credentials or tokens granting access to company or organiztion resources can quickly compromise your position with the organization. Please do not do this. To protect access to information, _never_ put passwords or other sensitive information into any files synchronized with version control. GeoAI-Retail implements the convention of Cookiecutter Data Science by keeping this sensitive information in a special file excluded from version control, and provides a method of easily accessing these values from anywhere in the project.
+Sharing your work is highly encouraged, but sharing sensitive information definitely is _not_. Almost without exception, compromising credentials or tokens granting access to company or organization resources can quickly compromise your position with the organization. Please do not do this. To protect access to information, _never_ put passwords or other sensitive information into any files synchronized with version control. GeoAI-Retail implements the convention of Cookiecutter Data Science by keeping this sensitive information in a special file excluded from version control, and provides a method of easily accessing these values from anywhere in the project.
 
 #### Special File `.env`
 
@@ -232,7 +232,7 @@ gis = GIS(
 
 ## Thank You!
 
-GeoAI-Cookiectutter is bulit on the shoulders of giants. It is merely an evoloution of existing work by DrivenData and Cookiecutter to suit the needs we have working at the intersection of geography and artificial intelligence. We owe a huge debt of gratitude to both.
+GeoAI-Retail is built on the shoulders of giants. It is merely an evolution of existing work by DrivenData and Cookiecutter to suit the needs we have working at the intersection of geography and artificial intelligence to solve retail challenges. We owe a huge debt of gratitude to both.
 
 ### [DrivenData](https://www.drivendata.org)
 
