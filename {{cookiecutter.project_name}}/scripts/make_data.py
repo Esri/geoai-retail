@@ -37,15 +37,17 @@ data_int = data/'interim'
 gdb_raw = data_raw/'raw.gdb'
 gdb_int = data_int/'interim.gdb'
 
-# customize the three six variables below to match your data
+# customize the following variables below to match your data
 origin_fc = str(gdb_int/'origin_geography')
 origin_id_fld = 'origin_id'
 
 location_fc = str(gdb_int/'location')
 location_id_fld = 'dest_id'
+location_count = 6
 
 location_competition_fc = str(gdb_int/'location_competition')
 location_competition_id_fld = 'comp_dest_id'
+location_competition_count = 6
 
 # this pipeline is based based on origin areas, brand locations, and competition locations
 pipe = Pipeline([
@@ -60,7 +62,7 @@ pipe = Pipeline([
         origin_id_field=origin_id_fld,
         location_layer=location_fc,
         location_id_field=location_id_fld,
-        destination_count=6,
+        destination_count=location_count,
         interim_data_directory=data_int
     )),
     ('comp_locations', preprocessing.AddNearestCompetitionLocationsToOriginDataframe(
@@ -68,7 +70,7 @@ pipe = Pipeline([
         origin_id_field=origin_id_fld,
         competition_location_layer=location_competition_fc,
         competition_location_id_field=location_competition_id_fld,
-        destination_count=6,
+        destination_count=location_competition_count,
         interim_data_directory=data_int
     ))
 ])
