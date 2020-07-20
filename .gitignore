@@ -16,3 +16,7 @@ tests/__pycache__/*
 
 # compiled python files
 **.*.pyc
+
+# data to be excluded
+original_data/
+data/

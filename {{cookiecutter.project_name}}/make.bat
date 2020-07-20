@@ -44,22 +44,6 @@ GOTO %1
         ECHO ^>^>^> Data processed.
     )
     EXIT /B
-
-:: Get data from Azure Blob Storage
-:get_data
-    ENDLOCAL & (
-        IF "%2"=="-o" CALL python scripts/azure_blob.py get "%PROJECT_DIR%" -o
-        IF "%2"=="" CALL python scripts/azure_blob.py get "%PROJECT_DIR%"
-    )
-    EXIT /B
-
-:: Push data to Azure Blob Storage
-:push_data
-    ENDLOCAL & (
-        IF "%2"=="-o" CALL python scripts/azure_blob.py push "%PROJECT_DIR%" -o
-        IF "%2"=="" CALL python scripts/azure_blob.py push "%PROJECT_DIR%"
-    )
-    EXIT /B
 	
 :: Export the current environment
 :env_export
@@ -78,12 +62,18 @@ GOTO %1
         CALL conda create --name "%ENV_NAME%" --clone "%CONDA_PARENT%"
         CALL activate "%ENV_NAME%"
 
+        :: Install nodejs so it does not throw an error later
+        CALL conda install -y nodejs
+
         :: Install additional packages
         CALL conda env update -f environment.yml
 
         :: Additional steps for the map widget to work in Jupyter Lab
         CALL jupyter labextension install @jupyter-widgets/jupyterlab-manager -y
-        CALL jupyter labextension install arcgis-map-ipywidget@1.7.0 -y
+        CALL jupyter labextension install arcgis-map-ipywidget@1.8.1 -y
+
+        :: Set the ArcGIS Pro Python environment
+        proenv "%ENV_NAME%"
     )
     EXIT /B
 

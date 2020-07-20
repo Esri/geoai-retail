@@ -3,22 +3,24 @@ name: {{ cookiecutter.conda_environment_name }}
 channels:
   - esri
   - conda-forge
-  - defaults
   - knu2xs
 
 dependencies:
-  - arcgis==1.7.1
+  - arcgis==1.8.1
   - ba-tools
   - cookiecutter
   - dask
+  - h3-py
+  - jupyterlab
   - mkdocs
   - nodejs
   - pillow
+  - pip
   - progress
-  - pyarrow
   - pylint
   - pytest
   - python-dotenv
+  - pyyaml
   - scipy
   - scikit-learn
   - seaborn
@@ -26,8 +28,8 @@ dependencies:
   - swifter
   - tqdm
   - pip:
-    - azure-storage-blob
     - ipykernel
+    - pyarrow
     - sphinx
     - sphinx-autodoc-typehints
     - sphinx_rtd_theme
