@@ -26,28 +26,33 @@ from ba_tools import preprocessing
 from sklearn.pipeline import Pipeline
 
 # facilitate using local {{cookiecutter.support_library}} package resources
-sys.path.insert(0, os.path.abspath('../src'))
 import {{cookiecutter.support_library}}
 
-# variable declarations
-data = Path(os.path.abspath(r'../data'))
-data_raw = data/'raw'
-data_int = data/'interim'
+# customize the following variables below to match your data
+origin_fc_name = 'origin_geography'
+origin_id_fld = 'origin_id'
+
+location_fc_name = 'location'
+location_id_fld = 'dest_id'
+location_count = 6
+
+location_competition_fc_name = 'location_competition'
+location_competition_id_fld = 'comp_dest_id'
+location_competition_count = 6
+
+# paths to resources
+dir_prj = Path(__file__).parent.parent
+dir_data = dir_prj/'data'
+data_raw = dir_data/'raw'
+data_int = dir_data/'interim'
 
 gdb_raw = data_raw/'raw.gdb'
 gdb_int = data_int/'interim.gdb'
 
-# customize the following variables below to match your data
 origin_fc = str(gdb_int/'origin_geography')
-origin_id_fld = 'origin_id'
+location_fc = str(gdb_int/location_fc_name)
+location_competition_fc = str(gdb_int/location_competition_fc_name)
 
-location_fc = str(gdb_int/'location')
-location_id_fld = 'dest_id'
-location_count = 6
-
-location_competition_fc = str(gdb_int/'location_competition')
-location_competition_id_fld = 'comp_dest_id'
-location_competition_count = 6
 
 # this pipeline is based based on origin areas, brand locations, and competition locations
 pipe = Pipeline([
