@@ -10,7 +10,6 @@ Clone the project by
 ------------
 ```
     ├── LICENSE
-    ├── Makefile           <- Makefile with commands like `make data`
     ├── make.bat           <- Windows batch file with commands like `make data`
     ├── setup.py           <- Setup script for the library ({{ cookiecutter.support_library }})
     ├── .env               <- Any environment variables here - created as part of project creation, 
@@ -46,4 +45,4 @@ Clone the project by
                                                   project. 
 ```
 
-<p><small>Project based on the <a target="_blank" href="https://github.com/esri/cookiecutter-geoai">cookiecutter GeoAI project template</a>. This template, in turn, is simply an extension and light modification of the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
+<p><small>Project based on the <a target="_blank" href="https://github.com/esri/geoai-cookiecutter">cookiecutter GeoAI project template</a>. This template, in turn, is simply an extension and light modification of the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
