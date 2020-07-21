@@ -31,7 +31,7 @@ Clone the project by
     ├── docs               <- A default Sphinx project; see sphinx-doc.org for details
     ├── models             <- Trained and serialized models, model predictions, or model summaries
     ├── notebooks          <- Jupyter notebooks. Naming convention is a 2 digits (for ordering),
-    │   │                     descriptive name. e.g.: 01_exploratory_analysis.ipynb
+    │   │                     descriptive name. e.g.: 01-exploratory-analysis.ipynb
     │   └── notebook_template.ipynb
     ├── references         <- Data dictionaries, manuals, and all other explanatory materials.
     ├── reports            <- Generated analysis as HTML, PDF, LaTeX, etc.
