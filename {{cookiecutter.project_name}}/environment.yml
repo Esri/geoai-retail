@@ -6,7 +6,7 @@ channels:
   - knu2xs
 
 dependencies:
-  - arcgis==1.8.1
+  - arcgis==1.8.2
   - ba-tools
   - cookiecutter
   - dask
