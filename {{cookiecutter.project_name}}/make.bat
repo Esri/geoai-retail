@@ -98,4 +98,11 @@ GOTO %1
 	)
 	EXIT /B
 
+:jupyter
+    ENDLOCAL & {
+        activate "%ENV_NAME%"
+        jupyter lab
+    }
+    EXIT /B
+
 EXIT /B
