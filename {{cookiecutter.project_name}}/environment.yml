@@ -7,7 +7,7 @@ channels:
 
 dependencies:
   - arcgis==1.8.2
-  - ba-tools
+  - ba-tools>=0.7.12
   - cookiecutter
   - dask
   - h3-py
