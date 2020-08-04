@@ -1,23 +1,23 @@
-'''
-    Licensing
- 
-    Copyright 2020 Esri
- 
-    Licensed under the Apache License, Version 2.0 (the "License"); You
-    may not use this file except in compliance with the License. You may
-    obtain a copy of the License at
-    http://www.apache.org/licenses/LICENSE-2.0
- 
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-    implied. See the License for the specific language governing
-    permissions and limitations under the License.
- 
-    A copy of the license is available in the repository's
-    LICENSE file.
-'''
+"""
+Licensing
 
+Copyright 2020 Esri
+
+Licensed under the Apache License, Version 2.0 (the "License"); You
+may not use this file except in compliance with the License. You may
+obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+implied. See the License for the specific language governing
+permissions and limitations under the License.
+
+A copy of the license is available in the repository's
+LICENSE file.
+"""
 import os
 from pathlib import Path
 import re
@@ -58,7 +58,7 @@ def _configure_aprx():
     new_aprx = arcpy.mp.ArcGISProject(new_project_path)
 
     # create the file geodatabases if they do not exist - ensures backwards compatibility
-    for data_name in ['interim', 'raw', 'processed']:
+    for data_name in ['interim', 'raw', 'processed', 'external']:
         dir_path = os.path.join(os.getcwd(), 'data', data_name)
         gdb_path = os.path.join(dir_path, f'{data_name}.gdb')        
         if not arcpy.Exists(gdb_path):
@@ -159,10 +159,12 @@ def _cleanup_aprx_catalog_tree(aprx_path, min_vers=None):
     return aprx_path
 
 
-# if the cookiecutter.gdb exists, get rid of it
+# if the cookiecutter.gdb or interim.gdb exists, get rid of it
 gdb_ck = os.path.join(os.getcwd(), 'arcgis', 'cookiecutter.gdb')
-if os.path.exists(gdb_ck):
-    shutil.rmtree(gdb_ck)
+gdb_int = os.path.join(os.getcwd(), 'data', 'interim.gdb')
+for gdb in [gdb_ck, gdb_int]:
+    if os.path.exists(gdb):
+        shutil.rmtree(gdb)
 
 # ensure the data directories are present
 dir_lst = [os.path.join(os.getcwd(), 'data', drctry)
