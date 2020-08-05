@@ -18,15 +18,16 @@
 ::
 :: A copy of the license is available in the repository's
 :: LICENSE file.
-::
+
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: VARIABLES                                                                    :
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 SETLOCAL
 SET PROJECT_DIR=%cd%
-SET PROJECT_NAME={{ cookiecutter.project_name }}
-SET ENV_NAME={{ cookiecutter.conda_environment_name }}
+SET PROJECT_NAME={{cookiecutter.project_name}}
+SET SUPPORT_LIBRARY = {{cookiecutter.support_library}}
+SET ENV_NAME={{cookiecutter.conda_environment_name}}
 SET CONDA_PARENT=arcgispro-py3
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -68,6 +69,9 @@ GOTO %1
         :: Install additional packages
         CALL conda env update -f environment.yml
 
+        :: Install the local package in development mode
+        CALL python -m pip install -e "./src/%SUPPORT_LIBRARY%"
+
         :: Additional steps for the map widget to work in Jupyter Lab
         CALL jupyter labextension install @jupyter-widgets/jupyterlab-manager -y
         CALL jupyter labextension install arcgis-map-ipywidget@1.8.2 -y
@@ -97,12 +101,5 @@ GOTO %1
 		pytest
 	)
 	EXIT /B
-
-:jupyter
-    ENDLOCAL & {
-        activate "%ENV_NAME%"
-        jupyter lab
-    }
-    EXIT /B
 
 EXIT /B
