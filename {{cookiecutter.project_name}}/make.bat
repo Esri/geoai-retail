@@ -26,7 +26,6 @@
 SETLOCAL
 SET PROJECT_DIR=%cd%
 SET PROJECT_NAME={{cookiecutter.project_name}}
-SET SUPPORT_LIBRARY = {{cookiecutter.support_library}}
 SET ENV_NAME={{cookiecutter.conda_environment_name}}
 SET CONDA_PARENT=arcgispro-py3
 
@@ -70,7 +69,7 @@ GOTO %1
         CALL conda env update -f environment.yml
 
         :: Install the local package in development mode
-        CALL python -m pip install -e "./src/%SUPPORT_LIBRARY%"
+        CALL python -m pip install -e .
 
         :: Additional steps for the map widget to work in Jupyter Lab
         CALL jupyter labextension install @jupyter-widgets/jupyterlab-manager -y
