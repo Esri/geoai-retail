@@ -4,7 +4,7 @@ import os
 from arcgis.features import GeoAccessor
 from arcgis.geometry import Geometry
 import arcpy
-from ba_tools import data, proximity
+from ba_tools import data, proximity, enrich
 
 # ensure outputs can be overwritten
 arcpy.env.overwriteOutput = True
@@ -12,14 +12,105 @@ arcpy.env.overwriteOutput = True
 
 class Toolbox(object):
     def __init__(self):
-        """Define the toolbox (the name of the toolbox is the name of the
-        .pyt file)."""
+        """Define the toolbox (the name of the toolbox is the name of the .pyt file)."""
         self.label = "GeoAI-Tools"
         self.alias = "GeoAI-Tools"
 
         # List of tool classes associated with this toolbox
-        self.tools = [GetNearestRoutingSolution, AddUsaGeographyLayer, GetBusinessesByCode, GetCompetitionByLayerLookup,
-                      ExportDataForMachineLearning, CreateAoiMask]
+        self.tools = [GetNearestRoutingSolution, EnichFromPreviouslyEnriched, AddUsaGeographyLayer, GetBusinessesByCode,
+                      GetCompetitionByLayerLookup, CreateAoiMask, ExportDataForMachineLearning]
+
+
+class EnichFromPreviouslyEnriched(object):
+    def __init__(self):
+        """Enrich a dataset using another previously enriched dataset as the template."""
+        """id_field:str=None, input_feature_class_fields_in_output:bool=False"""
+        self.label = "Erich from Previously Enriched"
+        self.description = "Enrich from Previously Enriched"
+        self.canRunInBackground = False
+        self.category = "Enrich"
+
+    def getParameterInfo(self):
+        """Input Parameters"""
+        enrch_lyr = arcpy.Parameter(
+            name='enrich_;yr',
+            displayName='Input Layer',
+            direction='Input',
+            datatype=['GPFeatureLayer', 'DEFeatureClass'],
+            parameterType='Required',
+            enabled=True
+        )
+
+        loc_id_fld = arcpy.Parameter(
+            name='geo_id',
+            displayName='Enrich Geography ID Field',
+            direction='Input',
+            datatype='Field',
+            parameterType='Optional',
+            enabled=False
+        )
+        loc_id_fld.parameterDependencies = [enrch_lyr.name]
+
+        tmplt_lyr = arcpy.Parameter(
+            name='tmplt_lyr',
+            displayName='Template Layer',
+            direction='Input',
+            datatype=['GPFeatureLayer', 'DEFeatureClass'],
+            parameterType='Required',
+            enabled=True
+        )
+
+        output_fc = arcpy.Parameter(
+            name='output_fc',
+            displayName='Output Feature Class',
+            direction='Output',
+            datatype='GPFeatureClass',
+            parameterType='Required',
+            enabled=True
+        )
+
+        params = [enrch_lyr, loc_id_fld, tmplt_lyr, output_fc]
+        return params
+
+    def isLicensed(self):
+        """Set whether tool is licensed to execute."""
+        return True
+
+    def updateParameters(self, parameters):
+        """Modify the values and properties of parameters before internal
+        validation is performed.  This method is called whenever a parameter
+        has been changed."""
+        if parameters[0].value:
+            parameters[1].enabled = True
+            parameters[1].parameterType = 'Required'
+        return
+
+    def updateMessages(self, parameters):
+        """Modify the messages created by internal validation for each tool
+        parameter.  This method is called after internal validation."""
+        return
+
+    def execute(self, parameters, messages):
+        """Tool source code."""
+        enrch_lyr = parameters[0].value
+        loc_id_fld = parameters[1].valueAsText
+        tmplt_lyr = parameters[2].value
+        output_fc = parameters[3].valueAsText
+
+        out_df = enrich.enrich_from_enriched(
+            enrich_template_feature_class=tmplt_lyr,
+            feature_class_to_enrich=enrch_lyr,
+            id_field=loc_id_fld,
+            input_feature_class_fields_in_output=False,
+            return_geometry=True
+        )
+        out_fc = out_df.spatial.to_featureclass(output_fc)
+
+        aprx = arcpy.mp.ArcGISProject('CURRENT')
+        aprx_map = aprx.activeMap
+        aprx_map.addLayer(out_fc)
+
+        return out_fc
 
 
 class AddUsaGeographyLayer(object):
