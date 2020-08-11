@@ -17,8 +17,9 @@ class Toolbox(object):
         self.alias = "GeoAI-Tools"
 
         # List of tool classes associated with this toolbox
-        self.tools = [GetNearestRoutingSolution, EnichFromPreviouslyEnriched, AddUsaGeographyLayer, GetBusinessesByCode,
-                      GetCompetitionByLayerLookup, CreateAoiMask, ExportDataForMachineLearning]
+        self.tools = [GetNearestRoutingSolution, EnichFromPreviouslyEnriched, AddUsaGeographyLayer,
+                      AddGeographyLayerInAoi, GetBusinessesByCode, GetCompetitionByLayerLookup, CreateAoiMask,
+                      ExportDataForMachineLearning]
 
 
 class EnichFromPreviouslyEnriched(object):
@@ -116,10 +117,10 @@ class EnichFromPreviouslyEnriched(object):
 class AddUsaGeographyLayer(object):
     def __init__(self):
         """Define the tool (tool name is the name of the class)."""
-        self.label = "Add USA Geography Layer"
-        self.description = "Add USA Geography Layer"
+        self.label = "Add Standard Geography Layer"
+        self.description = "Add Standard Geography Layer"
         self.canRunInBackground = False
-        self.category = "USA Data"
+        self.category = "Standard Geographic Areas"
 
     def getParameterInfo(self):
         """Define parameter definitions"""
@@ -151,10 +152,8 @@ class AddUsaGeographyLayer(object):
         parameter.  This method is called after internal validation."""
         return
 
-    def execute(self, parameters, messages):
-        """The source code of the tool."""
-        lyr_name = parameters[0].valueAsText
-
+    def _get_lyr(self, lyr_name):
+        """Helper function to look up layer from data."""
         if lyr_name == 'Block Group':
             out_lyr = data.layer_block_group
         elif lyr_name == 'Tract':
@@ -171,14 +170,87 @@ class AddUsaGeographyLayer(object):
             out_lyr = data.layer_dma
         elif lyr_name == 'State':
             out_lyr = data.layer_states
+        return out_lyr
 
-        out_lyr.name = str(lyr_name)
-
+    def _add_lyr_to_map(self, lyr):
+        """Helper function to add layer to active map."""
         aprx = arcpy.mp.ArcGISProject('CURRENT')
         aprx_map = aprx.activeMap
-        aprx_map.addLayer(out_lyr)
+        aprx_map.addLayer(lyr)
+        return
 
+    def execute(self, parameters, messages):
+        """The source code of the tool."""
+        lyr_name = parameters[0].valueAsText
+        out_lyr = self._get_lyr(lyr_name)
+        out_lyr.name = str(lyr_name)
+        self._add_lyr_to_map(out_lyr)
         return out_lyr
+
+
+class AddGeographyLayerInAoi(AddUsaGeographyLayer):
+
+    def __init__(self):
+        """Define the tool (tool name is the name of the class)."""
+        self.label = "Get Standard Geography in AOI"
+        self.description = "Get Standard Geography in AOI"
+        self.canRunInBackground = False
+        self.category = "Standard Geographic Areas"
+
+    def getParameterInfo(self):
+        """Define parameter definitions"""
+        geo_lyr = arcpy.Parameter(
+            name='ba_layer',
+            displayName='Business Analyst Layer',
+            direction='Input',
+            datatype='GPString',
+            parameterType='Required',
+            enabled=True
+        )
+        geo_lyr.filter.type = 'ValueList'
+        geo_lyr.filter.list = ['Block Group', 'Tract', 'Zip Code', 'County', 'Place/City', 'CBSA', 'DMA', 'State']
+
+        aoi_lyr = arcpy.Parameter(
+            name='aoi_layer',
+            displayName='Area of Interest',
+            direction='Input',
+            datatype='GPFeatureLayer',
+            parameterType='Required',
+            enabled=True
+        )
+        aoi_lyr.filter.list = ["Polygon"]
+
+        out_fc = arcpy.Parameter(
+            name='out_fc',
+            displayName='Output Feature Class',
+            direction='Output',
+            datatype='DEFeatureClass',
+            parameterType='Required',
+            enabled=True
+        )
+
+        params = [geo_lyr, aoi_lyr, out_fc]
+        return params
+
+    def execute(self, parameters, messages):
+        """The source code of the tool."""
+        geo_lyr_name = parameters[0].valueAsText
+        aoi_param = parameters[1].value
+        out_fc = parameters[2].valueAsText
+
+        geo_lyr = self._get_lyr(geo_lyr_name)
+        geo_lyr.name = str(geo_lyr_name)
+
+        aoi_lyr = arcpy.management.MakeFeatureLayer(aoi_param)[0]
+        sel_lyr = arcpy.management.SelectLayerByLocation(geo_lyr, 'HAVE_THEIR_CENTER_IN', aoi_lyr)[0]
+        geo_fc = arcpy.management.CopyFeatures(sel_lyr, out_fc)
+
+        geo_lyr = arcpy.management.MakeFeatureLayer(geo_fc)[0]
+        arcpy.management.ApplySymbologyFromLayer(geo_lyr, "./layer_files/origin_geo.lyrx")
+
+        self._add_lyr_to_map(geo_lyr)
+        
+        return geo_lyr
 
 
 class GetBusinessesByCode(object):
@@ -187,7 +259,7 @@ class GetBusinessesByCode(object):
         self.label = "Get Businesses by NAICS or SIC Code"
         self.description = "Get Business Feature Class by NAICS or SIC Code."
         self.canRunInBackground = False
-        self.category = "USA Data"
+        self.category = "Business Data"
 
     def getParameterInfo(self):
         """Define parameter definitions"""
@@ -214,10 +286,12 @@ class GetBusinessesByCode(object):
             name='aoi_layer',
             displayName='Area of Interest',
             direction='Input',
-            datatype=['GPFeatureLayer', 'DEFeatureClass'],
+            datatype='GPFeatureLayer',
             parameterType='Required',
             enabled=True
         )
+        aoi_lyr.filter.list = ["Polygon"]
+
         params = [code_type, code, aoi_lyr]
         return params
 
@@ -289,7 +363,7 @@ class GetCompetitionByLayerLookup(object):
         self.label = "Get Competitors by Layer Lookup"
         self.description = "Get Competitors Based on NAICS and SIC Codes in an Existing Layer"
         self.canRunInBackground = False
-        self.category = "USA Data"
+        self.category = "Business Data"
 
     def getParameterInfo(self):
         """Define parameter definitions"""
@@ -557,21 +631,18 @@ class ExportDataForMachineLearning(object):
             comp_out_fc = os.path.join(self.gdb, 'location_competition')
             self._create_output_features(comp_loc_lyr, comp_id_fld, comp_out_fc, 'comp_dest_id', comp_brnd_nm,
                                          'comp_brand_name')
-            # comp_lyr = arcpy.management.MakeFeatureLayer(comp_out_fc, 'Competition Locations')[0]
             comp_lyr = arcpy.mp.LayerFile('./layer_files/competition.lyrx')
             self.aprx_map.addLayer(comp_lyr)
 
         if loc_lyr:
             loc_out_fc = os.path.join(self.gdb, 'location')
             self._create_output_features(loc_lyr, loc_id_fld, loc_out_fc, 'dest_id')
-            # loc_lyr = arcpy.management.MakeFeatureLayer(loc_out_fc, 'Business Locations')[0]
             loc_lyr = arcpy.mp.LayerFile('./layer_files/business.lyrx')
             self.aprx_map.addLayer(loc_lyr)
 
         if origin_geo_lyr:
             orig_out_fc = os.path.join(self.gdb, 'origin_geography')
             self._create_output_features(origin_geo_lyr, origin_id_fld, orig_out_fc, 'origin_id')
-            # orig_lyr = arcpy.management.MakeFeatureLayer(orig_out_fc, 'Origin Geographies')[0]
             orig_lyr = arcpy.mp.LayerFile('./layer_files/origin_geo.lyrx')
             self.aprx_map.addLayer(orig_lyr)
 
@@ -584,7 +655,7 @@ class GetNearestRoutingSolution(object):
         self.label = "Get Nearest Routing Solution"
         self.description = "Create intermediate routing results to include all the routing geometries."
         self.canRunInBackground = False
-        self.category = "Create Demo Data"
+        self.category = "Demo Data"
 
         # get a reference to the current project, map and geodatabase
         aprx = arcpy.mp.ArcGISProject('CURRENT')
