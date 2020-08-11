@@ -14,7 +14,7 @@ class Toolbox(object):
     def __init__(self):
         """Define the toolbox (the name of the toolbox is the name of the .pyt file)."""
         self.label = "GeoAI-Tools"
-        self.alias = "GeoAI-Tools"
+        self.alias = "GeoAITools"
 
         # List of tool classes associated with this toolbox
         self.tools = [GetNearestRoutingSolution, EnichFromPreviouslyEnriched, AddUsaGeographyLayer,
