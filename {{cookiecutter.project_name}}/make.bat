@@ -26,6 +26,7 @@
 SETLOCAL
 SET PROJECT_DIR=%cd%
 SET PROJECT_NAME={{cookiecutter.project_name}}
+SET SUPPORT_LIBRARY = {{cookiecutter.support_library}}
 SET ENV_NAME={{cookiecutter.conda_environment_name}}
 SET CONDA_PARENT=arcgispro-py3
 
@@ -42,14 +43,6 @@ GOTO %1
         CALL activate "%ENV_NAME%"
         CALL python src/make_data.py
         ECHO ^>^>^> Data processed.
-    )
-    EXIT /B
-	
-:: Export the current environment
-:env_export
-    ENDLOCAL & (
-        CALL conda env export --name "%ENV_NAME%" > environment.yml
-        ECHO ^>^>^> "%PROJECT_NAME%" conda environment exported to ./environment.yml
     )
     EXIT /B
 	
@@ -80,6 +73,16 @@ GOTO %1
     )
     EXIT /B
 
+:: Update the current environment with resources needed to publish the package
+:env_dev
+    ENDLOCAL & (
+
+        :: Install additional packages
+        CALL conda env update -f environment_dev.yml
+
+    )
+    EXIT /B
+
 :: Activate the environment
 :env_activate
     ENDLOCAL & CALL activate "%ENV_NAME%"
@@ -92,6 +95,33 @@ GOTO %1
 		CALL conda env remove --name "%ENV_NAME%" -y
 	)
 	EXIT /B
+
+:: Make the package for uploading
+:build
+    ENDLOCAL & (
+
+        :: Build the pip package
+        CALL python setup.py sdist
+
+        :: Build conda package
+        CALL conda build ./conda-recipe --output-folder ./conda-recipe/conda-build
+
+    )
+    EXIT /B
+
+:build_upload
+    ENDLOCAL & (
+
+        :: Build the pip package
+        CALL python setup.py sdist bdist_wheel
+        CALL twine upload ./dist/*
+
+        :: Build conda package
+        CALL conda build ./conda-recipe --output-folder ./conda-recipe/conda-build
+        CALL anaconda upload ./conda-recipe/conda-build/win-64/{{ project_name }}*.tar.bz2
+
+    )
+    EXIT /B
 
 :: Run all tests in module
 :test
